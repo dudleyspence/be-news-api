@@ -12,7 +12,7 @@ afterAll(() => db.end());
 
 describe( "app", () => {
 
-    describe("URL not found", () => {
+    describe("404: URL not found", () => {
         test("when given an endpoint that isnt in app.js, returns 'Not Found!", () => {
             return request(app)
             .get('/api/incorrect-url')
@@ -25,7 +25,7 @@ describe( "app", () => {
 
     describe( "GET /api", () => {
 
-        test( "responds with a JSON showing all available endpoints", () => {
+        test( "200: responds with a JSON showing all available endpoints", () => {
             return request(app)
             .get('/api')
             .expect(200)
@@ -39,7 +39,7 @@ describe( "app", () => {
 
         describe( "GET", () => {
 
-            test( "returns a 200 and an array of topic objects with properties slug and description", () => {
+            test( "200: returns an array of topic objects with properties slug and description", () => {
                 return request(app)
                 .get('/api/topics')
                 .expect(200)
@@ -73,10 +73,53 @@ describe( "app", () => {
                 })
             } )
 
-            
+            test( "200: returns the article with the desired properties", () => {
+                
+                return request(app)
+                .get('/api/articles/1')
+                .expect(200)
+                .then(({body: {article}}) => {
+                    expect(Object.keys(article)).toHaveLength(8)
+                    expect(article).toMatchObject({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String)
+                    })
+                })
 
-        } )
+            })
 
-    } )
+            test( "200: returns the article with the given article_id", () => {
+                
+                return request(app)
+                .get('/api/articles/1')
+                .expect(200)
+                .then(({body: {article}}) => {
+                    const expected = {
+                        article_id: 1,
+                        title: "Living in the shadow of a great man",
+                        topic: "mitch",
+                        author: "butter_bridge",
+                        body: "I find this existence challenging",
+                        created_at: "2020-07-09T19:11:00.000Z",
+                        votes: 100,
+                        article_img_url:
+                          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                      }
+                    expect(article).toEqual(expected)
+                })
+            })
+
+        })
     
-} )
+    })
+
+    describe( "", () => {} )
+
+})
+
