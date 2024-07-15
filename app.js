@@ -2,13 +2,17 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const {} = require('./errors/errors')
+const {handleServerError} = require('./errors/errors')
+
+const endpoints = require('./endpoints.json')
+
 const {topicsControllers: {getTopics}} = require('./controllers/index.controllers');
 
 
-const { handleServerError } = require("./errors/errors");
 
-
+app.get('/api', (request, response, next) => {
+    response.status(200).send({endpoints})
+})
 
 
 app.get('/api/topics', getTopics)
