@@ -5,6 +5,7 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
 
+const endpoints = require('../endpoints.json')
 
 beforeAll(() => seed(data));
 afterAll(() => db.end());
@@ -22,6 +23,18 @@ describe( "app", () => {
         })
     })
 
+    describe( "GET /api", () => {
+
+        test( "responds with a JSON showing all available endpoints", () => {
+            return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.endpoints).toEqual(endpoints)
+            })
+        } )
+    } )
+
     describe( "/api/topics", () => {
 
         describe( "GET", () => {
@@ -32,8 +45,7 @@ describe( "app", () => {
                 .expect(200)
                 .then((response) => {
                     const body = response.body
-                    expect(body.topics.length).toBeGreaterThan(0)
-
+                    expect(body.topics).toHaveLength(3)
                     body.topics.forEach((topic) => {
                         expect(topic).toMatchObject({
                             slug: expect.any(String),
