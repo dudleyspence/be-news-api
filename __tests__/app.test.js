@@ -15,7 +15,7 @@ describe( "app", () => {
     describe("URL not found", () => {
         test("when given an endpoint that isnt in app.js, returns 'Not Found!", () => {
             return request(app)
-            .get('')
+            .get('/api/incorrect-url')
             .expect(404)
             .then((response) => {
                 expect(response.body.msg).toBe('Not Found!')
@@ -35,7 +35,7 @@ describe( "app", () => {
         } )
     } )
 
-    describe( "/api/topics", () => {
+    describe( "/api/topics/", () => {
 
         describe( "GET", () => {
 
@@ -57,6 +57,26 @@ describe( "app", () => {
 
             } )
         } )
+    } )
+
+    describe( "/api/articles/:article_id", () => {
+
+        describe( "GET", () => {
+
+            test( "400: Returns bad request when given an invalid id", () => {
+
+                return request(app)
+                .get('/api/articles/invalid_id')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            
+
+        } )
+
     } )
     
 } )

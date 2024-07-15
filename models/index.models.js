@@ -1,4 +1,4 @@
-const topicsModels = require('./topics.models')
+exports.topicsModels = require('./topics.models')
+exports.articlesModels = require('./articles.models')
 
-module.exports = {topicsModels}
 
