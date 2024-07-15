@@ -167,6 +167,17 @@ describe( "app", () => {
 
             } )
 
+            test( "400: returns bad request when given an invalid query", () => {
+                return request(app)
+                .get('/api/articles?sort_by=invalid_query')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+
+
+            } )
+
         } )
     } )
 
