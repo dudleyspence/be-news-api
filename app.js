@@ -6,7 +6,7 @@ const {handleServerError, handleCustomError} = require('./errors/errors')
 
 const endpoints = require('./endpoints.json')
 
-const {topicsControllers: {getTopics}, articlesControllers: {getArticleById}} = require('./controllers/index.controllers');
+const {topicsControllers: {getTopics}, articlesControllers: {getArticleById, getArticles}} = require('./controllers/index.controllers');
 
 app.get('/api', (request, response, next) => {
     response.status(200).send({endpoints})
@@ -18,6 +18,7 @@ app.get('/api/topics', getTopics)
 
 //articles
 app.get('/api/articles/:article_id', getArticleById)
+app.get('/api/articles', getArticles)
 
 
 
