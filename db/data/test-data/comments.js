@@ -9,6 +9,7 @@ module.exports = [
   {
     body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
     votes: 14,
+    
     author: "butter_bridge",
     article_id: 1,
     created_at: 1604113380000,
