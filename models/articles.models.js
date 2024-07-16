@@ -17,7 +17,11 @@ exports.fetchArticleById = (article_id) => {
 
 
     return db.query(queryStr, [article_id]).then(( {rows} ) => {
-        return rows[0]
+        if (rows.length === 0) {
+            return Promise.reject({status: 404, message: "not found" });
+        } else {
+            return rows[0]
+        }
     })
 }
 
@@ -54,8 +58,10 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
     }
     queryStr += `${order}`
 
+
     return db.query(queryStr).then(( {rows} ) => {
         return rows
+        
     })
 
 

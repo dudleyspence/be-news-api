@@ -115,6 +115,15 @@ describe( "app", () => {
                 })
             })
 
+            test( "404: returns not found", () => {
+                return request(app)
+                .get('/api/articles/99999')
+                .expect(404)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('not found')
+                })
+            } )
+
         })
     
     })
@@ -178,6 +187,71 @@ describe( "app", () => {
 
             } )
 
+        } )
+    } )
+
+    describe( "/api/articles/:article_id/comments", () => {
+
+        describe( "GET", () => {
+
+            test( "200: returns the correct number of comments for a given article", () => {
+                return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({body: {comments}}) => {
+                    expect(comments).toHaveLength(11)
+                })
+            } )
+
+            test( "200: returns the comments each with the desired properties", () => {
+                
+                return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({body: {comments}}) => {
+                    comments.forEach((comment) => {
+                        expect(Object.keys(comment)).toHaveLength(6)
+                        expect(comment).toMatchObject({
+                            comment_id: expect.any(Number),
+                            author: expect.any(String),
+                            body: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_id: expect.any(Number)
+                        })
+                    })
+                    
+
+                })
+
+            })
+
+            test( "200: returns the comments with the given article_id in the correct order", () => {
+                
+                return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({body: {comments}}) => {
+                    const expected = {
+                        comment_id: 5,
+                        body: 'I hate streaming noses',
+                        article_id: 1,
+                        author: 'icellusedkars',
+                        votes: 0,
+                        created_at: '2020-11-03T20:00:00.000Z'
+                      }
+                    expect(comments[0]).toEqual(expected)
+                })
+            })
+
+            test( "404: returns not found when the given article ID has no comments", () => {
+                return request(app)
+                .get('/api/articles/99999/comments')
+                .expect(404)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('not found')
+                })
+            } )
         } )
     } )
 
