@@ -1,6 +1,3 @@
-const topicsControllers = require('./topics.controllers')
+exports.topicsControllers = require('./topics.controllers')
+exports.articlesControllers = require('./articles.controllers')
 
-
-
-
-module.exports = {topicsControllers}
