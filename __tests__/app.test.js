@@ -119,7 +119,67 @@ describe( "app", () => {
     
     })
 
-    describe( "", () => {} )
+    describe( "/api/articles", () => {
+
+        describe( "GET", () => {
+
+            test( "200: returns an array of article objects with the desired properties", () => {
+                return request(app)
+                .get('/api/articles')
+                .expect(200)
+                .then(({body: {articles}}) => {
+
+                    expect(articles).toHaveLength(13)
+                    articles.forEach((article) => {
+                        expect(article).toMatchObject({
+                            article_id: expect.any(Number),
+                            title: expect.any(String),
+                            topic: expect.any(String),
+                            author: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_img_url: expect.any(String),
+                            comment_count: expect.any(Number)
+                        })
+                        
+                    });
+                })
+
+            } )
+
+            test( "200: the array of objects is sorted in descending order of date", () => {
+                return request(app)
+                .get('/api/articles')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles[0]).toEqual({
+                        article_id: 3,
+                        title: "Eight pug gifs that remind me of mitch",
+                        topic: "mitch",
+                        author: "icellusedkars",
+                        created_at: "2020-11-03T08:12:00.000Z",
+                        article_img_url:
+                          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                        votes: 0,
+                        comment_count: 2
+                      })
+                })
+
+            } )
+
+            test( "400: returns bad request when given an invalid query", () => {
+                return request(app)
+                .get('/api/articles?sort_by=invalid_query')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+
+
+            } )
+
+        } )
+    } )
 
 })
 

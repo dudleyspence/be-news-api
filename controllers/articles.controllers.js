@@ -1,5 +1,5 @@
 const { articlesModels } = require('../models/index.models')
-const {fetchArticleById} = articlesModels
+const {fetchArticleById, fetchArticles} = articlesModels
 
 exports.getArticleById = (request, response, next) => {
     const {article_id} = request.params
@@ -7,4 +7,16 @@ exports.getArticleById = (request, response, next) => {
         response.status(200).send({article})
     })
     .catch(next)
+}
+
+
+exports.getArticles = (request, response, next) => {
+
+    const { sort_by, order } = request.query
+    fetchArticles(sort_by, order).then((articles) => {
+
+        response.status(200).send({articles})
+    })
+    .catch(next)
+
 }
