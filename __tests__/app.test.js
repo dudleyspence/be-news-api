@@ -194,21 +194,14 @@ describe( "app", () => {
 
         describe( "GET", () => {
 
-            test( "200: returns the correct number of comments for a given article", () => {
-                return request(app)
-                .get('/api/articles/1/comments')
-                .expect(200)
-                .then(({body: {comments}}) => {
-                    expect(comments).toHaveLength(11)
-                })
-            } )
-
             test( "200: returns the comments each with the desired properties", () => {
                 
                 return request(app)
                 .get('/api/articles/1/comments')
                 .expect(200)
                 .then(({body: {comments}}) => {
+                    expect(comments).toHaveLength(11)
+
                     comments.forEach((comment) => {
                         expect(Object.keys(comment)).toHaveLength(6)
                         expect(comment).toMatchObject({
@@ -217,7 +210,7 @@ describe( "app", () => {
                             body: expect.any(String),
                             created_at: expect.any(String),
                             votes: expect.any(Number),
-                            article_id: expect.any(Number)
+                            article_id: 1
                         })
                     })
                     
@@ -232,15 +225,7 @@ describe( "app", () => {
                 .get('/api/articles/1/comments')
                 .expect(200)
                 .then(({body: {comments}}) => {
-                    const expected = {
-                        comment_id: 5,
-                        body: 'I hate streaming noses',
-                        article_id: 1,
-                        author: 'icellusedkars',
-                        votes: 0,
-                        created_at: '2020-11-03T20:00:00.000Z'
-                      }
-                    expect(comments[0]).toEqual(expected)
+                    expect(comments).toBeSortedBy('created_at')
                 })
             })
 
@@ -252,6 +237,62 @@ describe( "app", () => {
                     expect(message).toBe('not found')
                 })
             } )
+
+            test( "400: Returns bad request when given an invalid id", () => {
+
+                return request(app)
+                .get('/api/articles/invalid_id/comments')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('bad request')
+                })
+            } )
+        } )
+
+        describe( "POST", () => {
+
+            test( "400: returns bad request when the body doesnt contain the correct fields", () => {
+                const newComment = {}
+                return request(app).post('/api/articles/1/comments').send(newComment)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the body contains a field with a value that is invalid", () => {
+                const newComment = {username: 123, body:'my username isnt valid'}
+                return request(app).post('/api/articles/1/comments').send(newComment)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the username provided doesnt exist in the users table", () => {
+                const newComment = {username: 'dudleyspence', body:'my username isnt valid'}
+                return request(app).post('/api/articles/1/comments').send(newComment)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+            
+            test( "200: Returns the posted comment", () => {
+                const newComment = {username: 'butter_bridge', body: 'my first posted comment'}
+                return request(app).post('/api/articles/1/comments').send(newComment)
+                .expect(200)
+                .then(({body: {comment}})=> {
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        article_id: 1,
+                        author: 'butter_bridge',
+                        body: 'my first posted comment'
+                    })
+                });
+            })
+
         } )
     } )
 

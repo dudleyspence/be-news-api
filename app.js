@@ -8,7 +8,7 @@ const endpoints = require('./endpoints.json')
 
 const {topicsControllers: {getTopics}, 
 articlesControllers: {getArticleById, getArticles}, 
-commentsControllers: {getComments}} = require('./controllers/index.controllers');
+commentsControllers: {getComments, postComment}} = require('./controllers/index.controllers');
 
 app.get('/api', (request, response, next) => {
     response.status(200).send({endpoints})
@@ -25,6 +25,7 @@ app.get('/api/articles', getArticles)
 
 //comments
 app.get('/api/articles/:article_id/comments', getComments)
+app.post('/api/articles/:article_id/comments', postComment)
 
 
 
