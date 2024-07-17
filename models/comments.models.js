@@ -1,6 +1,6 @@
 
 const db = require('../db/connection')
-const {checkArticleIdExists, checkUsernameExists} = require('../db/utils/utils')
+const {checkArticleIdExists, checkUsernameExists, checkCommentExists} = require('../db/utils/utils')
 
 
 exports.fetchComments = (sort_by = 'created_at', order = 'ASC', article_id) => {
@@ -87,6 +87,35 @@ exports.addComment = (comment, article_id) => {
         return rows[0]
     }) 
 
+
+
+}
+
+exports.removeComment = (comment_id) => {
+
+    const isValidId = comment_id.match(/^\d+$/)
+    
+    if (!isValidId){
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+
+    const sqlQuery = `
+    DELETE FROM comments
+    WHERE comment_id=$1
+    RETURNING *`
+
+    const queryValues = [comment_id]
+
+    const promiseArray = [checkCommentExists(comment_id), db.query(sqlQuery, queryValues)]
+
+
+    return Promise.all(promiseArray).then(([commentExists, {rows}]) => {
+        if (!commentExists && rows.length ===0){
+            return Promise.reject({status: 404, message: "not found" });
+        } else {
+            return rows[0]
+        }
+    })
 
 
 }

@@ -1,5 +1,5 @@
 const { articlesModels } = require('../models/index.models')
-const {fetchArticleById, fetchArticles} = articlesModels
+const {fetchArticleById, fetchArticles, incVotesByArticleId} = articlesModels
 
 exports.getArticleById = (request, response, next) => {
     const {article_id} = request.params
@@ -20,3 +20,12 @@ exports.getArticles = (request, response, next) => {
 
 }
  
+exports.patchVotes = (request, response, next) => {
+    const {article_id} = request.params
+    const patchBody = request.body
+
+    incVotesByArticleId(article_id, patchBody).then((votes) => {
+        response.status(200).send(votes)
+    })
+    .catch(next)
+}
