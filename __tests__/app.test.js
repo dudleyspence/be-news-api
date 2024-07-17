@@ -231,7 +231,7 @@ describe( "app", () => {
 
         } )
 
-        describe("GET with queries", () => {
+        describe("GET sort_by and order queries", () => {
             test( "200: the array of objects is sorted in descending order of votes", () => {
                 return request(app)
                 .get('/api/articles?sort_by=votes')
@@ -274,6 +274,35 @@ describe( "app", () => {
 
 
         })
+
+        describe( "GET topic queries", () => {
+
+            //ignores queries that dont exist (/api/articles?potato=idontexist)
+            //When given a topic but one that doesnt exist returns empty
+            // e.g. (/api/articles?topic=idontexist)
+
+            test( "200: responds with the articles with the given topic", () => {
+                return request(app)
+                .get('/api/articles?topic=mitch')
+                .expect(200)
+                .then(({body: {articles}}) => {
+
+                    articles.forEach((article) => {
+                        expect(article).toMatchObject({
+                            article_id: expect.any(Number),
+                            title: expect.any(String),
+                            topic: 'mitch',
+                            author: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_img_url: expect.any(String),
+                            comment_count: expect.any(Number)
+                        })
+                        
+                    });
+                })
+            } )
+        } )
 
     })
 
