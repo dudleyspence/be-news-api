@@ -203,22 +203,50 @@ describe( "app", () => {
                 .get('/api/articles')
                 .expect(200)
                 .then(({body: {articles}}) => {
-                    expect(articles[0]).toEqual({
-                        article_id: 3,
-                        title: "Eight pug gifs that remind me of mitch",
-                        topic: "mitch",
-                        author: "icellusedkars",
-                        created_at: "2020-11-03T08:12:00.000Z",
-                        article_img_url:
-                          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-                        votes: 0,
-                        comment_count: 2
-                      })
+                    expect(articles).toBeSortedBy('created_at', {descending: true})
                 })
 
             } )
 
-        } )
+        })
+        describe("GET with queries", () => {
+            test( "200: the array of objects is sorted in descending order of votes", () => {
+                return request(app)
+                .get('/api/articles?sort_by=votes')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles).toBeSortedBy('votes', {descending: true})
+                })
+
+            } )
+            test( "200: the array of objects is sorted in ascending order of title", () => {
+                return request(app)
+                .get('/api/articles?sort_by=title&order=asc')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles).toBeSortedBy('title', {ascending: true})
+                })
+
+            } )
+
+            test("400: returns invalid query when given a sort_by that isnt valid", () => {
+                return request(app)
+                .get('/api/articles?sort_by=article_img_url')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+            })
+
+            test("400: returns invalid query when given an order that isnt valid", () => {
+                return request(app)
+                .get('/api/articles?order=upsidedown')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+            })
+        })
     } )
 
     describe( "/api/articles/:article_id/comments", () => {
