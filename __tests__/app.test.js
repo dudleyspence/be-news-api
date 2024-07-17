@@ -230,10 +230,6 @@ describe( "app", () => {
 
             } )
 
-            test("400: returns invalid query when given a sort_by that isnt valid", () => {
-                return request(app)
-                .get('/api/articles?sort_by=article_img_url')
-
             test( "400: returns bad request when given an invalid query", () => {
                 return request(app)
                 .get('/api/articles?sort_by=invalid_query')
@@ -253,15 +249,12 @@ describe( "app", () => {
                     expect(message).toBe('invalid query')
                 })
             })
+
+
+
         })
 
-
-
-            } )
-
-        } )
-
-    } )
+    })
 
     describe( "/api/articles/:article_id/comments", () => {
 
