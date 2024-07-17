@@ -307,6 +307,41 @@ describe( "app", () => {
                 .then(({body: {message}})=> {
                     expect(message).toBe('bad request')
                 })
+            })
+
+            test( "400: returns bad request when given an invalid article_id", () => {
+                const newComment = {username: 'butter_bridge', body: 'my first posted comment'}
+                return request(app).post('/api/articles/invalid_id/comments').send(newComment)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+
+            } )
+
+            test( "404: returns not found when given an article_id that doesnt exist", () => {
+                const newComment = {username: 'butter_bridge', body: 'my first posted comment'}
+                return request(app).post('/api/articles/invalid_id/comments').send(newComment)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+
+            } )
+
+            test( "200: ignores any extra comment properties", () => {
+                const newComment = {username: 'butter_bridge', body: 'my first posted comment', extra_property: 'ignore me'}
+                return request(app).post('/api/articles/1/comments').send(newComment)
+                .expect(200)
+                .then(({body: {comment}})=> {
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        article_id: 1,
+                        author: 'butter_bridge',
+                        body: 'my first posted comment'
+                    })
+                })
             } )
             
             test( "200: Returns the posted comment", () => {
@@ -352,6 +387,29 @@ describe( "app", () => {
                 .expect(400)
                 .then(({body: {message}}) => {
                     expect(message).toBe('bad request')
+                })
+            } )
+        } )
+    } )
+
+    describe( "/api/users", () => {
+
+        describe( "GET", () => {
+
+            test( "200: returns all the users", () => {
+                return request(app)
+                .get('/api/users')
+                .expect(200)
+                .then(({body: {users}}) => {
+                    expect(users).toHaveLength(4)
+                    users.forEach((user) => {
+                        expect(user).toMatchObject({
+                            username: expect.any(String),
+                            name: expect.any(String),
+                            avatar_url: expect.any(String)
+                        })
+                    })
+                    
                 })
             } )
         } )
