@@ -2,8 +2,10 @@
   "name": "be_news_api_",
   "version": "1.0.0",
   "description": "be_news_api_",
-  "main": "index.js",
+  "main": "listen.js",
   "scripts": {
+    "start": "node ./db/listen.js",
+    "seed-prod": "NODE_ENV=production npm run seed",
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "node ./db/seeds/run-seed.js",
     "test": "jest",
