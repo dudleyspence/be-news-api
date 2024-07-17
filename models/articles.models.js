@@ -26,9 +26,10 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
-    const validSortBys = ['created_at', 'author', 'title', 'votes']
+exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic) => {
+    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
 
+    queryValues = []
 
     let queryStr = `SELECT 
     articles.author, 
@@ -41,8 +42,15 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
     COUNT(comments.article_id)::INT AS comment_count
     FROM articles 
     LEFT JOIN comments 
-    ON articles.article_id = comments.article_id
-    GROUP BY 
+    ON articles.article_id = comments.article_id `
+
+
+    if (topic){
+        queryStr += `WHERE articles.topic=$1 `
+        queryValues.push(topic)
+    }
+
+    queryStr +=`GROUP BY 
     articles.article_id `
 
 
@@ -51,15 +59,19 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
         return Promise.reject({status: 400, message: 'invalid query'})
     }
 
+
     queryStr += `ORDER BY ${sort_by} `
 
-    if (!['asc', 'desc'].includes(order)){
+
+
+    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order)){
         return Promise.reject({status: 400, message: 'invalid query'})
     }
+
     queryStr += `${order}`
 
 
-    return db.query(queryStr).then(( {rows} ) => {
+    return db.query(queryStr, queryValues).then(( {rows} ) => {
         return rows
         
     })
