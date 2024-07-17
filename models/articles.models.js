@@ -4,7 +4,19 @@ const { checkArticleIdExists } = require('../db/utils/utils')
 
 exports.fetchArticleById = (article_id) => {
 
-    let queryStr = `SELECT * FROM articles `
+    let queryStr = `SELECT 
+    articles.author, 
+    articles.title, 
+    articles.article_id, 
+    articles.topic, 
+    articles.created_at, 
+    articles.votes,
+    articles.body, 
+    articles.article_img_url,
+    COUNT(comments.article_id)::INT AS comment_count
+    FROM articles 
+    LEFT JOIN comments 
+    ON articles.article_id = comments.article_id `
 
     const isValidId = article_id.match(/^\d+$/)
     
@@ -13,17 +25,24 @@ exports.fetchArticleById = (article_id) => {
     }
 
     
-    queryStr += `WHERE article_id = $1`
+    queryStr += `WHERE articles.article_id = $1 `
 
 
+    queryStr +=`GROUP BY 
+    articles.article_id `
 
-    return db.query(queryStr, [article_id]).then(( {rows} ) => {
-        if (rows.length === 0) {
-            return Promise.reject({status: 404, message: "not found" });
+    console.log(queryStr)
+
+    return checkArticleIdExists(article_id).then((articleExists) => {
+        if (!articleExists){
+            return Promise.reject({status: 404, message: "not found" })
         } else {
-            return rows[0]
+            return db.query(queryStr, [article_id])
         }
+    }).then(({rows}) => {
+        return rows[0]
     })
+
 }
 
 exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic) => {
