@@ -6,32 +6,26 @@ const {handleServerError, handleCustomError, handlePSQLErrors} = require('./erro
 
 const endpoints = require('./endpoints.json')
 
-const {topicsControllers: {getTopics}, 
-articlesControllers: {getArticleById, getArticles, patchVotes}, 
-commentsControllers: {getComments, postComment, deleteComment}, usersControllers: {getUsers}} 
-= require('./controllers/index.controllers');
 
+// Import routers
+const topicsRouter = require('./routes/topics.routes');
+const articlesRouter = require('./routes/articles.routes');
+const commentsRouter = require('./routes/comments.routes');
+const usersRouter = require('./routes/users.routes');
+
+
+//GET endpoints
 app.get('/api', (request, response, next) => {
     response.status(200).send({endpoints})
 })
 
 
-//topics
-app.get('/api/topics', getTopics)
+// Use routers
+app.use('/api', topicsRouter);
+app.use('/api', articlesRouter);
+app.use('/api', commentsRouter);
+app.use('/api', usersRouter);
 
-//articles
-app.get('/api/articles/:article_id', getArticleById)
-app.get('/api/articles', getArticles)
-app.patch('/api/articles/:article_id', patchVotes)
-
-
-//comments
-app.get('/api/articles/:article_id/comments', getComments)
-app.post('/api/articles/:article_id/comments', postComment)
-app.delete('/api/comments/:comment_id', deleteComment)
-
-//users
-app.get('/api/users', getUsers)
 
 
 //URL not found
