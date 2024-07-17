@@ -79,7 +79,6 @@ describe( "app", () => {
                 .get('/api/articles/1')
                 .expect(200)
                 .then(({body: {article}}) => {
-                    expect(Object.keys(article)).toHaveLength(8)
                     expect(article).toMatchObject({
                         article_id: expect.any(Number),
                         title: expect.any(String),
@@ -111,7 +110,7 @@ describe( "app", () => {
                         article_img_url:
                           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
                       }
-                    expect(article).toEqual(expected)
+                    expect(article).toMatchObject(expected)
                 })
             })
 
@@ -123,6 +122,27 @@ describe( "app", () => {
                     expect(message).toBe('not found')
                 })
             } )
+
+            test( "200: returns the article with a comment_count property", () => {
+                return request(app)
+                .get('/api/articles/1')
+                .expect(200)
+                .then(({body: {article}}) => {
+                    const expected = {
+                        comment_count: 11,
+                        article_id: 1,
+                        title: "Living in the shadow of a great man",
+                        topic: "mitch",
+                        author: "butter_bridge",
+                        body: "I find this existence challenging",
+                        created_at: "2020-07-09T19:11:00.000Z",
+                        votes: 100,
+                        article_img_url:
+                          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                      }
+                    expect(article).toEqual(expected)
+                })
+            })
 
         })
 
