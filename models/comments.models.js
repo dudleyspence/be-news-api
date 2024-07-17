@@ -53,13 +53,7 @@ exports.fetchComments = (sort_by = 'created_at', order = 'ASC', article_id) => {
 
 exports.addComment = (comment, article_id) => {
 
-
-
-    if (Object.keys(comment).length !== 2 || Object.keys(comment)[0] !== 'username' || Object.keys(comment)[1] !== 'body'){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
-
-    if (typeof comment.username !== 'string' || typeof comment.body !== 'string'){
+    if (!comment.username || !comment.body || typeof comment.username !== 'string' || typeof comment.body !== 'string'){
         return Promise.reject({status: 400, message: 'bad request'})
     }
 
@@ -77,15 +71,20 @@ exports.addComment = (comment, article_id) => {
     VALUES ($1, $2, $3, $4) 
     RETURNING *`
 
-    return checkUsernameExists(comment.username).then((usernameExists) => {
+    const promiseArray = [checkUsernameExists(comment.username), checkArticleIdExists(article_id)]
+
+
+    return Promise.all(promiseArray).then(([usernameExists, article_idExists]) => {
         if (!usernameExists){
             return Promise.reject({status: 400, message: 'bad request'})
+        } else if (!article_idExists) {
+            return Promise.reject({status: 404, message: 'not found'})
         } else {
             return db.query(queryStr, postData)
         }
     }).then(({rows}) => {
         return rows[0]
-    }) 
+    })
 
 
 
@@ -119,3 +118,4 @@ exports.removeComment = (comment_id) => {
 
 
 }
+

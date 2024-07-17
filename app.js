@@ -2,13 +2,13 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const {handleServerError, handleCustomError} = require('./errors/errors')
+const {handleServerError, handleCustomError, handlePSQLErrors} = require('./errors/errors')
 
 const endpoints = require('./endpoints.json')
 
 const {topicsControllers: {getTopics}, 
 articlesControllers: {getArticleById, getArticles, patchVotes}, 
-commentsControllers: {getComments, postComment, deleteComment}} 
+commentsControllers: {getComments, postComment, deleteComment}, usersControllers: {getUsers}} 
 = require('./controllers/index.controllers');
 
 app.get('/api', (request, response, next) => {
@@ -30,6 +30,8 @@ app.get('/api/articles/:article_id/comments', getComments)
 app.post('/api/articles/:article_id/comments', postComment)
 app.delete('/api/comments/:comment_id', deleteComment)
 
+//users
+app.get('/api/users', getUsers)
 
 
 //URL not found
@@ -39,6 +41,7 @@ app.all("*", (request, response) => {
 
 
 //Error Handling
+app.use(handlePSQLErrors)
 app.use(handleCustomError)
 app.use(handleServerError)
 
