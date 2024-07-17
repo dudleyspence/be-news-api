@@ -27,7 +27,7 @@ exports.fetchArticleById = (article_id) => {
 }
 
 exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
-    const validSortBys = ['created_at', 'author', 'title', 'votes']
+    const validSortBys = ['created_at']
 
 
     let queryStr = `SELECT 
