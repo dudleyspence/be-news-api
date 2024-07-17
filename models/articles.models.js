@@ -31,8 +31,6 @@ exports.fetchArticleById = (article_id) => {
     queryStr +=`GROUP BY 
     articles.article_id `
 
-    console.log(queryStr)
-
     return checkArticleIdExists(article_id).then((articleExists) => {
         if (!articleExists){
             return Promise.reject({status: 404, message: "not found" })
