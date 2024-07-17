@@ -230,7 +230,52 @@ describe( "app", () => {
             } )
 
         } )
-    } )
+
+        describe("GET with queries", () => {
+            test( "200: the array of objects is sorted in descending order of votes", () => {
+                return request(app)
+                .get('/api/articles?sort_by=votes')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles).toBeSortedBy('votes', {descending: true})
+                })
+
+            } )
+            test( "200: the array of objects is sorted in ascending order of title", () => {
+                return request(app)
+                .get('/api/articles?sort_by=title&order=asc')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles).toBeSortedBy('title', {ascending: true})
+                })
+
+            } )
+
+            test( "400: returns bad request when given an invalid query", () => {
+                return request(app)
+                .get('/api/articles?sort_by=invalid_query')
+
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+
+            })
+
+            test("400: returns invalid query when given an order that isnt valid", () => {
+                return request(app)
+                .get('/api/articles?order=upsidedown')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('invalid query')
+                })
+            })
+
+
+
+        })
+
+    })
 
     describe( "/api/articles/:article_id/comments", () => {
 
