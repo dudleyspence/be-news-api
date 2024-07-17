@@ -1,4 +1,5 @@
 const db = require('../db/connection')
+const { checkArticleIdExists } = require('../db/utils/utils')
 
 
 exports.fetchArticleById = (article_id) => {
@@ -24,7 +25,6 @@ exports.fetchArticleById = (article_id) => {
         }
     })
 }
-
 
 exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
     const validSortBys = ['created_at']
@@ -67,3 +67,40 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
 
 }
 
+exports.incVotesByArticleId = (article_id, patchBody) => {
+
+    if (Object.keys(patchBody).length !== 1 || Object.keys(patchBody)[0] !== "inc_votes"){
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+    
+    const {inc_votes} = patchBody
+
+
+    const isValidId = article_id.match(/^\d+$/)
+
+    const isValidIncVotes = (typeof inc_votes === 'number')
+    
+    if (!isValidId || !isValidIncVotes){
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+
+    let querySQL = `
+        UPDATE articles
+        SET votes = votes + $1
+        WHERE article_id = $2
+        RETURNING votes `
+
+
+    return checkArticleIdExists(article_id).then((articleExists) => {
+        if (!articleExists){
+            return Promise.reject({status: 400, message: 'bad request'})
+        } else {
+            return db.query(querySQL, [inc_votes, article_id])
+        }
+    })
+    .then(({rows}) => {
+        return rows[0]
+    })
+    
+
+}

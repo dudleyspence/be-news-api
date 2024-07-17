@@ -7,8 +7,9 @@ const {handleServerError, handleCustomError} = require('./errors/errors')
 const endpoints = require('./endpoints.json')
 
 const {topicsControllers: {getTopics}, 
-articlesControllers: {getArticleById, getArticles}, 
-commentsControllers: {getComments, postComment}} = require('./controllers/index.controllers');
+articlesControllers: {getArticleById, getArticles, patchVotes}, 
+commentsControllers: {getComments, postComment, deleteComment}} 
+= require('./controllers/index.controllers');
 
 app.get('/api', (request, response, next) => {
     response.status(200).send({endpoints})
@@ -21,11 +22,13 @@ app.get('/api/topics', getTopics)
 //articles
 app.get('/api/articles/:article_id', getArticleById)
 app.get('/api/articles', getArticles)
+app.patch('/api/articles/:article_id', patchVotes)
 
 
 //comments
 app.get('/api/articles/:article_id/comments', getComments)
 app.post('/api/articles/:article_id/comments', postComment)
+app.delete('/api/comments/:comment_id', deleteComment)
 
 
 

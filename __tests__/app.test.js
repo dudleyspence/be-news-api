@@ -125,6 +125,48 @@ describe( "app", () => {
             } )
 
         })
+
+        describe("PATCH", () => {
+
+            test("200: returns the updated article", () => {
+
+                return request(app)
+                .patch('/api/articles/1')
+                .send({inc_votes: 1})
+                .expect(200)
+                .then(({body: {votes}}) => {
+                    expect(votes).toBe(101)
+                })
+            })
+
+            test( "400: returns bad request when the body doesnt contain the correct fields", () => {
+                const incVotes = {}
+                return request(app).patch('/api/articles/1').send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the body contains a field with a value that is invalid", () => {
+                const incVotes = {inc_votes: 'invalid'}
+                return request(app).patch('/api/articles/1').send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the given article_id is potentially valid but doesnt exist in the article table", () => {
+                const incVotes = {inc_votes: 2}
+                return request(app).patch('/api/articles/9999999').send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+            
+        })
     
     })
 
@@ -282,6 +324,36 @@ describe( "app", () => {
                 });
             })
 
+        } )
+    } )
+
+    describe( "/api/comments/:comment_id", () => {
+
+        describe( "DELETE", () => {
+
+            test( "204: deletes comment using comment_id and responds with no content", () => {
+                return request(app)
+                .delete('/api/comments/1')
+                .expect(204)
+            } )
+
+            test( "404: responds 'not found' when trying to delete a comment that doesnt exist", () => {
+                return request(app)
+                .delete('/api/comments/999999')
+                .expect(404)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('not found')
+                })
+            } )
+
+            test( "400: responds bad request when trying to delete a comment with an invalid id", () => {
+                return request(app)
+                .delete('/api/comments/invalid')
+                .expect(400)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('bad request')
+                })
+            } )
         } )
     } )
 
