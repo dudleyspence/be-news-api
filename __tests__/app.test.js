@@ -208,6 +208,7 @@ describe( "app", () => {
 
             } )
 
+
         })
         describe("GET with queries", () => {
             test( "200: the array of objects is sorted in descending order of votes", () => {
@@ -232,10 +233,16 @@ describe( "app", () => {
             test("400: returns invalid query when given a sort_by that isnt valid", () => {
                 return request(app)
                 .get('/api/articles?sort_by=article_img_url')
+
+            test( "400: returns bad request when given an invalid query", () => {
+                return request(app)
+                .get('/api/articles?sort_by=invalid_query')
+
                 .expect(400)
                 .then(({body: {message}}) => {
                     expect(message).toBe('invalid query')
                 })
+
             })
 
             test("400: returns invalid query when given an order that isnt valid", () => {
@@ -247,6 +254,13 @@ describe( "app", () => {
                 })
             })
         })
+
+
+
+            } )
+
+        } )
+
     } )
 
     describe( "/api/articles/:article_id/comments", () => {
