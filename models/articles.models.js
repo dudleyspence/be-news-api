@@ -43,7 +43,7 @@ exports.fetchArticleById = (article_id) => {
 
 }
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic) => {
+exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) => {
     const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
 
     queryValues = []
@@ -61,6 +61,10 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic) => {
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
+    if (author){
+        queryStr += `WHERE articles.author=$1 `
+        queryValues.push(author)
+    }
 
     if (topic){
         queryStr += `WHERE articles.topic=$1 `
