@@ -1,4 +1,4 @@
-const { fetchComments, addComment, removeComment } = require('../models/comments.models')
+const { fetchComments, addComment, removeComment, incVotesByCommentId } = require('../models/comments.models')
 
 
 exports.getComments = (request, response, next) => {
@@ -29,6 +29,17 @@ exports.deleteComment = (request, response, next) => {
 
     removeComment(comment_id).then(() => {
         response.status(204).send({message: 'no content'})
+    })
+    .catch(next)
+}
+
+exports.patchCommentVotes = (request, response, next) => {
+    const {comment_id} = request.params
+    const patchBody = request.body
+
+    incVotesByCommentId(comment_id, patchBody).then((comment) => {
+        console.log(comment)
+        response.status(200).send({comment})
     })
     .catch(next)
 }

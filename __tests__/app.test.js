@@ -526,6 +526,60 @@ describe( "app", () => {
                 })
             } )
         } )
+
+        describe("PATCH", () => {
+
+            test( "200: returns the updated comment", () => {
+                return request(app)
+                .patch('/api/comments/2')
+                .send({inc_votes: 1})
+                .expect(200)
+                .then(({body: {comment}}) => {
+                    console.log(comment)
+                    expect(comment).toMatchObject({
+                        body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+                        votes: 15,
+                        comment_id: 2,
+                        author: "butter_bridge",
+                        article_id: 1,
+                        created_at: '2020-10-31T02:03:00.000Z'
+                      })
+                })
+            } )
+
+            test( "400: returns bad request when the body doesnt contain the correct fields", () => {
+                const incVotes = {}
+                return request(app)
+                .patch('/api/comments/2')
+                .send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the body contains a field with a value that is invalid", () => {
+                const incVotes = {inc_votes: 'invalid'}
+                return request(app)
+                .patch('/api/comments/2')
+                .send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+
+            test( "400: returns bad request when the given comment_id is potentially valid but doesnt exist in the article table", () => {
+                const incVotes = {inc_votes: 2}
+                return request(app)
+                .patch('/api/comments/1')
+                .send(incVotes)
+                .expect(400)
+                .then(({body: {message}})=> {
+                    expect(message).toBe('bad request')
+                })
+            } )
+        })
     } )
 
     describe( "/api/users", () => {
