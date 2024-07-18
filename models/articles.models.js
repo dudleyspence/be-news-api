@@ -67,6 +67,7 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic) => {
         queryValues.push(topic)
     }
 
+
     queryStr +=`GROUP BY 
     articles.article_id `
 

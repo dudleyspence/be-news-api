@@ -295,7 +295,7 @@ describe( "app", () => {
 
         })
 
-        describe( "GET topic queries", () => {
+        describe( "GET queries", () => {
 
             //ignores queries that dont exist (/api/articles?potato=idontexist)
             //When given a topic but one that doesnt exist returns empty
@@ -320,6 +320,14 @@ describe( "app", () => {
                         })
                         
                     });
+                })
+            } )
+            test( "200: responds with an empty array when the topic has no articles", () => {
+                return request(app)
+                .get('/api/articles?topic=paper')
+                .expect(200)
+                .then(({body: {articles}}) => {
+                    expect(articles).toEqual([]);
                 })
             } )
         } )
@@ -519,6 +527,8 @@ describe( "app", () => {
             } )
         } )
     } )
+
+
 
 })
 
