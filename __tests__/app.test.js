@@ -322,6 +322,29 @@ describe( "app", () => {
                     });
                 })
             } )
+
+            test( "200: responds with the articles with the given author", () => {
+                return request(app)
+                .get('/api/articles?author=butter_bridge')
+                .expect(200)
+                .then(({body: {articles}}) => {
+
+                    articles.forEach((article) => {
+                        expect(article).toMatchObject({
+                            article_id: expect.any(Number),
+                            title: expect.any(String),
+                            topic: expect.any(String),
+                            author: 'butter_bridge',
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_img_url: expect.any(String),
+                            comment_count: expect.any(Number)
+                        })
+                        
+                    });
+                })
+            } )
+
             test( "200: responds with an empty array when the topic has no articles", () => {
                 return request(app)
                 .get('/api/articles?topic=paper')
@@ -507,6 +530,7 @@ describe( "app", () => {
 
     describe( "/api/users", () => {
 
+
         describe( "GET", () => {
 
             test( "200: returns all the users", () => {
@@ -528,6 +552,34 @@ describe( "app", () => {
         } )
     } )
 
+    describe( "/api/users/:username", () => {
+
+        describe( "GET", () => {
+
+            test( "200: returns the user object", () => {
+                return request(app)
+                .get('/api/users/butter_bridge')
+                .expect(200)
+                .then(({body: {user}}) => {
+                    expect(user).toMatchObject({
+                        username: 'butter_bridge',
+                        name: 'jonny',
+                        avatar_url:
+                          'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
+                    })
+                })
+            } )
+
+            test('404: returns not found when given a username that doesnt exist', () => {
+                return request(app)
+                .get('/api/users/dudleyspence')
+                .expect(404)
+                .then(({body: {message}}) => {
+                    expect(message).toBe('not found')
+                })
+            })
+        } )
+    } )
 
 
 })

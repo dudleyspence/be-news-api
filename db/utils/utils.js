@@ -11,7 +11,7 @@ exports.checkArticleIdExists = (article_id) => {
 
 exports.checkUsernameExists = (username) => {
     return db
-    .query(`SELECT * FROM users WHERE username=$1`, [username])
+    .query(`SELECT * FROM users WHERE username=$1 `, [username])
     .then(({rows})=>{
         return rows.length>0
     })
