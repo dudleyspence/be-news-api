@@ -19,7 +19,7 @@ exports.getArticles = (request, response, next) => {
 
 }
  
-exports.patchVotes = (request, response, next) => {
+exports.patchArticleVotes = (request, response, next) => {
     const {article_id} = request.params
     const patchBody = request.body
 

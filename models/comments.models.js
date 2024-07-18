@@ -119,3 +119,43 @@ exports.removeComment = (comment_id) => {
 
 }
 
+exports.incVotesByCommentId = (comment_id, patchBody) => {
+
+    if (Object.keys(patchBody).length !== 1 || Object.keys(patchBody)[0] !== "inc_votes"){
+
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+    
+    const {inc_votes} = patchBody
+
+
+    const isValidId = comment_id.match(/^\d+$/)
+
+    const isValidIncVotes = (typeof inc_votes === 'number')
+    
+    if (!isValidId || !isValidIncVotes){
+
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+
+    let querySQL = `
+        UPDATE comments
+        SET votes = votes + $1
+        WHERE comment_id = $2
+        RETURNING * `
+
+
+    return checkCommentExists(comment_id).then((commentExists) => {
+        if (!commentExists){
+
+            return Promise.reject({status: 400, message: 'bad request'})
+        } else {
+            return db.query(querySQL, [inc_votes, comment_id])
+        }
+    })
+    .then(({rows}) => {
+        return rows[0]
+    })
+    
+
+}
