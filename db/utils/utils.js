@@ -32,17 +32,3 @@ exports.checkTopicExists = (topic) => {
         return rows.length>0
     })
 }
-
-exports.checkNewArticleIsValid = (article) => {
-
-    const newArticleRequirements = ['author', 'title', 'body', 'topic']
-    
-    includesRequirements = article.every((articleKey) => articleKey.includes(newArticleRequirements))
-
-
-    
-
-    
-
-
-}

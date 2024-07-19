@@ -422,65 +422,44 @@ describe("app", () => {
           });
       });
 
-      test("400: bad request when the input doesnt include one of the required object keys", () => {
-        const article1 = {
-          author: "lurker",
-          title: "First Article Post",
-          body: "hello this is my first article",
-        };
-        const article2 = {
-            author: "lurker",
-            title: "First Article Post",
-            topic: "mitch",
-        };
-        const article3 = {
-            author: "lurker",
-            body: "hello this is my first article",
-            topic: "mitch",
-        };
-        const article4 = {
-            title: "First Article Post",
-            body: "hello this is my first article",
-            topic: "mitch",
-        };
-
-        testPromises =[]
-          
-        testPromises.push(request(app)
-        .post("/api/articles")
-        .send(article1)
-        .expect(400)
-        .then(({ body: { message } }) => {
-            expect(message).toBe("bad request");
-        }))
-
-        testPromises.push(request(app)
-        .post("/api/articles")
-        .send(article2)
-        .expect(400)
-        .then(({ body: { message } }) => {
-            expect(message).toBe("bad request");
-        }))
-
-        testPromises.push(request(app)
-        .post("/api/articles")
-        .send(article3)
-        .expect(400)
-        .then(({ body: { message } }) => {
-            expect(message).toBe("bad request");
-        }))
-
-        testPromises.push(request(app)
-        .post("/api/articles")
-        .send(article4)
-        .expect(400)
-        .then(({ body: { message } }) => {
-            expect(message).toBe("bad request");
-        }))
-
-        return Promise.all(testPromises)
-
-      });
+      test("400: bad request when the input doesn't include one of the required object keys", () => {
+        const inputArticles = [
+            {
+                author: "lurker",
+                title: "First Article Post",
+                body: "hello this is my first article"
+            },
+            {
+                author: "lurker",
+                title: "First Article Post",
+                topic: "mitch"
+            },
+            {
+                author: "lurker",
+                body: "hello this is my first article",
+                topic: "mitch"
+            },
+            {
+                title: "First Article Post",
+                body: "hello this is my first article",
+                topic: "mitch"
+            }
+        ];
+    
+        const testPromises = inputArticles.map(article => {
+            return request(app)
+                .post("/api/articles")
+                .send(article)
+                .expect(400)
+                .then(({ body: { message } }) => {
+                    expect(message).toBe("bad request");
+                });
+        });
+        
+        //using promise.all to test 4 versions of the same test
+        return Promise.all(testPromises);
+    });
+    
 
       test("200: ignores unwanted extra object keys", () => {
         const article = {
@@ -672,27 +651,31 @@ describe("app", () => {
 
   describe("/api/comments/:comment_id", () => {
     describe("DELETE", () => {
-      test("204: deletes comment using comment_id and responds with no content", () => {
-        return request(app).delete("/api/comments/1").expect(204);
-      });
+        test("204: deletes comment using comment_id and responds with no content", () => {
+            return request(app)
+            .delete("/api/comments/1")
+            .then(response => {
+                expect(response.status).toBe(204)
+            })
+        });
 
-      test("404: responds 'not found' when trying to delete a comment that doesnt exist", () => {
-        return request(app)
-          .delete("/api/comments/999999")
-          .expect(404)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("not found");
-          });
-      });
+        test("404: responds 'not found' when trying to delete a comment that doesnt exist", () => {
+            return request(app)
+            .delete("/api/comments/999999")
+            .expect(404)
+            .then(({ body: { message } }) => {
+                expect(message).toBe("not found");
+            });
+        });
 
-      test("400: responds bad request when trying to delete a comment with an invalid id", () => {
-        return request(app)
-          .delete("/api/comments/invalid")
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("bad request");
-          });
-      });
+        test("400: responds bad request when trying to delete a comment with an invalid id", () => {
+            return request(app)
+            .delete("/api/comments/invalid")
+            .expect(400)
+            .then(({ body: { message } }) => {
+                expect(message).toBe("bad request");
+            });
+        });
     });
 
     describe("PATCH", () => {
