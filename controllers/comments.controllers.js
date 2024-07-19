@@ -38,7 +38,6 @@ exports.patchCommentVotes = (request, response, next) => {
     const patchBody = request.body
 
     incVotesByCommentId(comment_id, patchBody).then((comment) => {
-        console.log(comment)
         response.status(200).send({comment})
     })
     .catch(next)
