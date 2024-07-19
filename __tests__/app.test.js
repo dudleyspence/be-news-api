@@ -51,6 +51,33 @@ describe("app", () => {
           });
       });
     });
+    describe( "POST", () => {
+
+      test( "200: responds with the posted topic", () => {
+        const topicBody = {slug: 'newTopic', description: 'my new topic'}
+        return request(app)
+        .post('/api/topics')
+        .send(topicBody)
+        .expect(200)
+        .then(({body: {topic}}) => {
+          expect(topic).toMatchObject({
+            slug: 'newTopic',
+            description: 'my new topic'
+          })
+        })
+      } )
+
+      test( "400: returns bad request when topic already exists", () => {
+        const topicBody = {slug: 'mitch', description: 'my new topic'}
+        return request(app)
+        .post('/api/topics')
+        .send(topicBody)
+        .expect(400)
+        .then(({body: {message}}) => {
+          expect(message).toBe('bad request')
+        })  
+      } )
+    } )
   });
 
   describe("/api/articles/:article_id", () => {
