@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-const { checkArticleIdExists } = require('../db/utils/utils')
+const { checkArticleIdExists, checkTopicExists, checkUsernameExists } = require('../db/utils/utils')
 
 
 exports.fetchArticleById = (article_id) => {
@@ -137,4 +137,67 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
     })
     
 
+}
+
+exports.addArticle = (article) => {
+
+    
+
+
+    let queryStr = `
+    INSERT INTO articles (author, title, body, topic, article_img_url)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *, (
+              SELECT COUNT(*)::INT 
+              FROM comments 
+              WHERE comments.article_id = articles.article_id
+          ) AS comment_count;`
+
+    let articleChecksArray = [checkUsernameExists(article.author), checkTopicExists(article.topic)]
+
+    const newArticleRequirements = ['author', 'title', 'body', 'topic']
+
+    includesRequirements = newArticleRequirements.every((requiredKey) => Object.keys(article).includes(requiredKey))
+
+    if (!includesRequirements){
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+
+
+    let queryValues = [article.author, article.title, article.body, article.topic]
+    
+    //a google suggested url regex
+    const urlRegex = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig
+
+
+    if (article.article_img_url && urlRegex.test(article.article_img_url)){
+        queryValues.push(article.article_img_url)
+    } else {
+        queryStr = `
+        INSERT INTO articles (author, title, body, topic)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *, (
+              SELECT COUNT(*)::INT 
+              FROM comments 
+              WHERE comments.article_id = articles.article_id
+          ) AS comment_count;`
+    }
+
+
+
+    return Promise.all(articleChecksArray).then(([authorExists, topicExists]) => {
+        if (!authorExists || !topicExists){
+
+            return Promise.reject({status: 400, message: 'bad request'})
+        } else {
+            return db.query(queryStr, queryValues)
+        }
+    }).then(({rows}) => {
+
+        return rows[0]
+    })
+
+
+
+    
 }

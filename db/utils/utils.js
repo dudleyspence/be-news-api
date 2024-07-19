@@ -24,3 +24,25 @@ exports.checkCommentExists = (comment_id) => {
         return rows.length>0
     })
 }
+
+exports.checkTopicExists = (topic) => {
+    return db
+    .query(`SELECT * FROM topics WHERE slug=$1`, [topic])
+    .then(({rows})=>{
+        return rows.length>0
+    })
+}
+
+exports.checkNewArticleIsValid = (article) => {
+
+    const newArticleRequirements = ['author', 'title', 'body', 'topic']
+    
+    includesRequirements = article.every((articleKey) => articleKey.includes(newArticleRequirements))
+
+
+    
+
+    
+
+
+}
