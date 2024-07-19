@@ -18,7 +18,7 @@ exports.fetchArticleById = (article_id) => {
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
-    const isValidId = article_id.match(/^\d+$/)
+    const isValidId = /^\d+$/.test(article_id)
     
     if (!isValidId){
         return Promise.reject({status: 400, message: 'bad request'})
@@ -43,11 +43,25 @@ exports.fetchArticleById = (article_id) => {
 
 }
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) => {
-    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
+exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', limit=10, p=1, topic, author) => {
 
     const queryValues = []
 
+    //Validate sort_by and order
+    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
+
+    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order) || !validSortBys.includes(sort_by)){
+        return Promise.reject({status: 400, message: 'invalid query'})
+    }
+
+    //validate limit and page
+    if(!/^\d+$/.test(p) || !/^\d+$/.test(limit)){
+        return Promise.reject({status: 400, message: 'invalid query'})
+    }
+    queryValues.push(limit)
+    queryValues.push(p)
+
+  
     let queryStr = `SELECT 
     articles.author, 
     articles.title, 
@@ -61,43 +75,34 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) 
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
-    if (author){
-        queryStr += `WHERE articles.author=$1 `
-        queryValues.push(author)
-    }
+    if (author || topic){
+        queryStr += `WHERE `
 
-    if (topic){
-        queryStr += `WHERE articles.topic=$1 `
-        queryValues.push(topic)
-    }
+        if (author && topic){
+            queryStr += `articles.topic=$3 AND articles.author=$4 `
+            queryValues.push(topic, author)
+        } else if (author && !topic){
+            queryStr += `articles.author=$3 `
+            queryValues.push(author)
+        } else if (!author && topic){
+            queryStr += `articles.topic=$3 `
+            queryValues.push(topic)
 
+        }
+    }
 
     queryStr +=`GROUP BY 
     articles.article_id `
 
+    queryStr += `ORDER BY ${sort_by} ${order} `
 
-    if (!validSortBys.includes(sort_by)){
-        
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
-
-
-    queryStr += `ORDER BY ${sort_by} `
-
-
-
-    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order)){
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
-
-    queryStr += `${order}`
+    queryStr += `LIMIT $1 OFFSET $1*($2-1) `
 
 
     return db.query(queryStr, queryValues).then(( {rows} ) => {
         return rows
         
     })
-
 
 }
 
@@ -110,7 +115,7 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
     const {inc_votes} = patchBody
 
 
-    const isValidId = article_id.match(/^\d+$/)
+    const isValidId = /^\d+$/.test(article_id)
 
     const isValidIncVotes = (typeof inc_votes === 'number')
     
@@ -140,9 +145,6 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
 }
 
 exports.addArticle = (article) => {
-
-    
-
 
     let queryStr = `
     INSERT INTO articles (author, title, body, topic, article_img_url)
