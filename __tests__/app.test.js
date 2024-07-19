@@ -204,6 +204,16 @@ describe("app", () => {
           });
       });
     });
+
+    describe( "DELETE", () => {
+      test("204: deletes the article using article_id and responds with no content", () => {
+        return request(app)
+        .delete("/api/articles/2")
+        .then((response) => {
+            expect(response.status).toBe(204)
+        })
+      })
+    })
   });
 
   describe("/api/articles", () => {
@@ -563,7 +573,7 @@ describe("app", () => {
         .get('/api/articles?p=2')
         .expect(200)
         .then(({body: {articles}}) => {
-          expect(articles).toHaveLength(7)
+          expect(articles).toHaveLength(6)
         })
       })
 
@@ -583,7 +593,7 @@ describe("app", () => {
         .get('/api/articles?limit=1000')
         .expect(200)
         .then(({body: {articles}}) => {
-          expect(articles).toHaveLength(17)
+          expect(articles).toHaveLength(16)
         })
       })
 
@@ -620,7 +630,7 @@ describe("app", () => {
         .get('/api/articles?p=1&limit=5')
         .expect(200)
         .then(({body:{total}}) => {
-          expect(total).toBe(17)
+          expect(total).toBe(16)
         })
       })
 

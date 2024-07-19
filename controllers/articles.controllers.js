@@ -1,4 +1,4 @@
-const {fetchArticleById, fetchArticles, incVotesByArticleId, addArticle} = require('../models/articles.models')
+const {fetchArticleById, fetchArticles, incVotesByArticleId, addArticle, removeArticle} = require('../models/articles.models')
 
 exports.getArticleById = (request, response, next) => {
     const {article_id} = request.params
@@ -38,4 +38,13 @@ exports.postArticle = (request, response, next) => {
     })
     .catch(next)
 
+}
+
+exports.deleteArticle = (request, response, next) => {
+    const {article_id} = request.params
+
+    removeArticle(article_id).then(() => {
+        return response.sendStatus(204)
+    })
+    .catch(next)
 }

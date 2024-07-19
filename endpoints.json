@@ -6,7 +6,34 @@
     "description": "Serves an array of all topics.",
     "queries": [],
     "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+      "topics": [
+        {
+          "slug": "mitch",
+          "description": "The man, the Mitch, the legend"
+        },
+        {
+          "slug": "cats",
+          "description": "Not dogs"
+        },
+        {
+          "slug": "paper",
+          "description": "What books are made of"
+        }
+      ]
+    }
+  },
+  "POST /api/topics": {
+    "description": "Adds a new topic and returns the posted topic.",
+    "queries": [],
+    "exampleRequestBody": {
+      "slug": "newTopic",
+      "description": "my new topic"
+    },
+    "exampleResponse": {
+      "topic": {
+        "slug": "newTopic",
+        "description": "my new topic"
+      }
     }
   },
   "GET /api/articles": {
@@ -15,13 +42,14 @@
     "exampleResponse": {
       "articles": [
         {
-          "title": "Seafood substitutions are increasing",
-          "topic": "cooking",
-          "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": "2018-05-30T15:59:13.341Z",
-          "votes": 0,
-          "comment_count": 6
+          "title": "Living in the shadow of a great man",
+          "topic": "mitch",
+          "author": "butter_bridge",
+          "body": "I find this existence challenging",
+          "created_at": "2020-07-09T19:11:00.000Z",
+          "votes": 100,
+          "comment_count": 11,
+          "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
         }
       ]
     }
@@ -32,15 +60,25 @@
     "exampleResponse": {
       "article": {
         "article_id": 1,
-        "title": "Seafood substitutions are increasing",
-        "topic": "cooking",
-        "author": "weegembump",
-        "body": "Text from the article..",
-        "created_at": "2018-05-30T15:59:13.341Z",
-        "votes": 0,
-        "article_img_url": "www.url.com",
-        "comment_count": 6
+        "title": "Living in the shadow of a great man",
+        "topic": "mitch",
+        "author": "butter_bridge",
+        "body": "I find this existence challenging",
+        "created_at": "2020-07-09T19:11:00.000Z",
+        "votes": 100,
+        "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        "comment_count": 11
       }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "Updates the votes of an article by the given article_id.",
+    "queries": [],
+    "exampleRequestBody": {
+      "inc_votes": 1
+    },
+    "exampleResponse": {
+      "votes": 101
     }
   },
   "GET /api/articles/:article_id/comments": {
@@ -77,18 +115,43 @@
       }
     }
   },
-  "PATCH /api/articles/:article_id": {
-    "description": "Updates the votes of an article by the given article_id.",
+  "GET /api/articles?topic=mitch": {
+    "description": "Serves an array of all articles filtered by the topic 'mitch'.",
+    "queries": [],
+    "exampleResponse": {
+      "articles": [
+        {
+          "title": "Living in the shadow of a great man",
+          "topic": "mitch",
+          "author": "butter_bridge",
+          "body": "I find this existence challenging",
+          "created_at": "2020-07-09T19:11:00.000Z",
+          "votes": 100,
+          "comment_count": 11,
+          "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+      ]
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "Updates the votes of a comment by the given comment_id.",
     "queries": [],
     "exampleRequestBody": {
       "inc_votes": 1
     },
     "exampleResponse": {
-      "votes": 1
+      "comment": {
+        "comment_id": 1,
+        "body": "This is a comment.",
+        "article_id": 1,
+        "author": "icellusedkars",
+        "votes": 1,
+        "created_at": "2020-11-03T20:00:00.000Z"
+      }
     }
   },
-  "DELETE /api/comments/:comment_id": {
-    "description": "Deletes a comment by the given comment_id.",
+  "DELETE /api/articles/:article_id": {
+    "description": "Deletes an article by the given article_id.",
     "queries": [],
     "exampleResponse": {}
   },
@@ -98,12 +161,61 @@
     "exampleResponse": {
       "users": [
         {
-          "username": "weegembump",
-          "name": "Gemma Bump",
-          "avatar_url": "www.url.com/avatar.jpg"
+          "username": "butter_bridge",
+          "name": "Jonny",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        },
+        {
+          "username": "icellusedkars",
+          "name": "Sam",
+          "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+        },
+        {
+          "username": "rogersop",
+          "name": "Paul",
+          "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "Returns a user object for the given username.",
+    "queries": [],
+    "exampleResponse": {
+      "user": {
+        "username": "butter_bridge",
+        "name": "Jonny",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
+    }
+  },
+  "POST /api/articles": {
+    "description": "Adds a new article and returns the posted article.",
+    "queries": [],
+    "exampleRequestBody": {
+      "author": "icellusedkars",
+      "title": "New Article",
+      "body": "This is the body of the new article.",
+      "topic": "mitch",
+      "article_img_url": "https://www.example.com/image.jpg"
+    },
+    "exampleResponse": {
+      "article": {
+        "article_id": 1,
+        "title": "New Article",
+        "topic": "mitch",
+        "author": "icellusedkars",
+        "body": "This is the body of the new article.",
+        "created_at": "2020-07-09T19:11:00.000Z",
+        "votes": 0,
+        "article_img_url": "https://www.example.com/image.jpg",
+        "comment_count": 0
+      }
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "Deletes a comment by the given comment_id.",
+    "queries": [],
+    "exampleResponse": {}
   }
 }
-
