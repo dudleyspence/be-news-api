@@ -16,6 +16,6 @@ exports.handleCustomError = (err, request, response, next) => {
     }
 }
 
-exports.handleServerError = (err, request, response, next) => {
+exports.handleServerError = (err, request, response) => {
     response.status(500).send({message: 'Internal server error'})
 }

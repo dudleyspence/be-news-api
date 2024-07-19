@@ -64,11 +64,11 @@ exports.addComment = (comment, article_id) => {
         return Promise.reject({status: 400, message: 'bad request'})
     }
 
-    const postData = [comment.body, comment.username, Number(article_id), votes = 0]
+    const postData = [comment.body, comment.username, Number(article_id)]
 
     let queryStr = `INSERT INTO comments 
-    (body, author, article_id, votes) 
-    VALUES ($1, $2, $3, $4) 
+    (body, author, article_id) 
+    VALUES ($1, $2, $3) 
     RETURNING *`
 
     const promiseArray = [checkUsernameExists(comment.username), checkArticleIdExists(article_id)]

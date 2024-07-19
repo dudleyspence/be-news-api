@@ -13,7 +13,7 @@ const { topicsRouter, articlesRouter, commentsRouter, usersRouter } = require('.
 
 
 //GET endpoints
-app.get('/api', (request, response, next) => {
+app.get('/api', (request, response) => {
     response.status(200).send({endpoints})
 })
 

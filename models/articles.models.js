@@ -46,7 +46,7 @@ exports.fetchArticleById = (article_id) => {
 exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) => {
     const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
 
-    queryValues = []
+    const queryValues = []
 
     let queryStr = `SELECT 
     articles.author, 
@@ -157,7 +157,7 @@ exports.addArticle = (article) => {
 
     const newArticleRequirements = ['author', 'title', 'body', 'topic']
 
-    includesRequirements = newArticleRequirements.every((requiredKey) => Object.keys(article).includes(requiredKey))
+    const includesRequirements = newArticleRequirements.every((requiredKey) => Object.keys(article).includes(requiredKey))
 
     if (!includesRequirements){
         return Promise.reject({status: 400, message: 'bad request'})
@@ -167,7 +167,8 @@ exports.addArticle = (article) => {
     let queryValues = [article.author, article.title, article.body, article.topic]
     
     //a google suggested url regex
-    const urlRegex = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig
+    const urlRegex = /((http(s)?:\/\/)?(www\.)?[a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%._+~#?&//=]*))/ig;
+
 
 
     if (article.article_img_url && urlRegex.test(article.article_img_url)){
