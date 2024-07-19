@@ -2,11 +2,11 @@ const { fetchComments, addComment, removeComment, incVotesByCommentId } = requir
 
 
 exports.getComments = (request, response, next) => {
-    const { sort_by, order } = request.query
+    const { sort_by, order, limit, p } = request.query
 
     const {article_id} = request.params
 
-    fetchComments(sort_by, order, article_id).then((comments) => {
+    fetchComments(sort_by, order, limit, p,  article_id).then((comments) => {
 
         response.status(200).send({comments})
     })

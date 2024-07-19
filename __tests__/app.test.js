@@ -609,8 +609,7 @@ describe("app", () => {
           .get("/api/articles/1/comments")
           .expect(200)
           .then(({ body: { comments } }) => {
-            expect(comments).toHaveLength(11);
-
+            expect(comments.length>0).toBe(true);
             comments.forEach((comment) => {
               expect(Object.keys(comment)).toHaveLength(6);
               expect(comment).toMatchObject({
@@ -624,6 +623,30 @@ describe("app", () => {
             });
           });
       });
+      test( "200: returns only the given limit number of comments", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=5")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(5)
+          })
+      })
+      test( "200: returns the default limit number of comments", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(10)
+          })
+      })
+      test( "200: returns the results from the given page", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=2")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(1)
+          })
+      })
 
       test("200: returns the comments with the given article_id in the correct order", () => {
         return request(app)
