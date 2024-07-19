@@ -46,6 +46,7 @@ exports.fetchArticleById = (article_id) => {
 exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', limit=10, p=1, topic, author) => {
 
     const queryValues = []
+    const totalQueryValues = []
 
     //Validate sort_by and order
     const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
@@ -75,33 +76,46 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', limit=10, p=1, 
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
+    let totalQueryStr = queryStr
+    
+
     if (author || topic){
         queryStr += `WHERE `
+        totalQueryStr += `WHERE `
 
         if (author && topic){
             queryStr += `articles.topic=$3 AND articles.author=$4 `
+            totalQueryStr += `articles.topic=$1 AND articles.author=$2 `
             queryValues.push(topic, author)
+            totalQueryValues.push(topic, author)
         } else if (author && !topic){
             queryStr += `articles.author=$3 `
+            totalQueryStr += `articles.author=$1 `
             queryValues.push(author)
+            totalQueryValues.push(author)
         } else if (!author && topic){
             queryStr += `articles.topic=$3 `
+            totalQueryStr += `articles.topic=$1 `
             queryValues.push(topic)
-
+            totalQueryValues.push(topic)
         }
     }
 
-    queryStr +=`GROUP BY 
+    queryStr += `GROUP BY 
+    articles.article_id `
+
+    totalQueryStr += `GROUP BY 
     articles.article_id `
 
     queryStr += `ORDER BY ${sort_by} ${order} `
 
     queryStr += `LIMIT $1 OFFSET $1*($2-1) `
 
-
-    return db.query(queryStr, queryValues).then(( {rows} ) => {
-        return rows
-        
+    return Promise.all([db.query(queryStr, queryValues), db.query(totalQueryStr, totalQueryValues)])
+    .then(([result1, result2]) => {
+        const filteredArticles = result1.rows
+        const total_results = result2.rowCount
+        return [filteredArticles, total_results]
     })
 
 }

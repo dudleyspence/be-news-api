@@ -588,6 +588,15 @@ describe("app", () => {
         })
       })
 
+      test("200: returns the total number of results ignoring the limit and page", () => {
+        return request(app)
+        .get('/api/articles?p=1&limit=5')
+        .expect(200)
+        .then(({body:{total}}) => {
+          expect(total).toBe(17)
+        })
+      })
+
 
     } )
 

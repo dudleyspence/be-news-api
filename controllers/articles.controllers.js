@@ -12,8 +12,8 @@ exports.getArticleById = (request, response, next) => {
 exports.getArticles = (request, response, next) => {
 
     const { sort_by, order, topic, author, limit, p} = request.query
-    fetchArticles(sort_by, order, limit, p, topic, author).then((articles) => {
-        response.status(200).send({articles})
+    fetchArticles(sort_by, order, limit, p, topic, author).then(([filteredArticles, total_results]) => {
+        response.status(200).send({articles:filteredArticles, total: total_results})
     })
     .catch(next)
 
