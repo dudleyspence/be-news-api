@@ -218,3 +218,27 @@ exports.addArticle = (article) => {
 
     
 }
+
+exports.removeArticle = (article_id) => {
+    
+    if (!/^\d+$/.test(article_id)){
+        return Promise.reject({status: 400, message: 'bad request'})
+    }
+
+    const sqlQuery = `
+    DELETE FROM articles
+    WHERE article_id=$1
+    RETURNING *`
+
+    const queryValues = [article_id]
+
+    return checkArticleIdExists(article_id).then((articleExists) => {
+        if (!articleExists){
+            return Promise.reject({status: 404, message: "not found" })
+        } else {
+            return db.query(sqlQuery, queryValues)
+        }
+    }).then(({rows}) => {   
+        return rows
+    })   
+}
