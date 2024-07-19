@@ -186,7 +186,7 @@ describe("app", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            expect(articles).toHaveLength(13);
+            expect(articles).toHaveLength(10);
             articles.forEach((article) => {
               expect(article).toMatchObject({
                 article_id: expect.any(Number),
@@ -270,9 +270,6 @@ describe("app", () => {
     });
 
     describe("GET queries", () => {
-      //ignores queries that dont exist (/api/articles?potato=idontexist)
-      //When given a topic but one that doesnt exist returns empty
-      // e.g. (/api/articles?topic=idontexist)
 
       test("200: responds with the articles with the given topic", () => {
         return request(app)
@@ -313,6 +310,28 @@ describe("app", () => {
             });
           });
       });
+
+      test("200: responds with the articles with the given author and topic when querying both topic and author at the same time", () => {
+        return request(app)
+          .get("/api/articles?author=butter_bridge&topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            articles.forEach((article) => {
+              expect(article).toMatchObject({
+                article_id: expect.any(Number),
+                title: expect.any(String),
+                topic: "mitch",
+                author: "butter_bridge",
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(Number),
+              });
+            });
+          });
+      });
+
+
 
       test("200: responds with an empty array when the topic has no articles", () => {
         return request(app)
@@ -488,6 +507,99 @@ describe("app", () => {
           });
       });
     });
+
+    describe( "GET pagination queries", () => {
+
+      test( "200: limits the responses to the given number", () => {
+
+        return request(app)
+        .get('/api/articles?limit=15')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(15)
+        })
+      } )
+
+      test( "200: limits the responses to the default of 10", () => {
+
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(10)
+        })
+      } )
+
+      test( "200: limits the responses to the given number and shows the given page. Accounts for the second page not having the full limit.", () => {
+
+        return request(app)
+        .get('/api/articles?p=2')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(7)
+        })
+      })
+
+      test( "200: limits the responses to the first page when p=1.", () => {
+
+        return request(app)
+        .get('/api/articles?p=1')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(10)
+        })
+      })
+
+      test( "200: when limit is bigger than the total articles, returns all articles", () => {
+
+        return request(app)
+        .get('/api/articles?limit=1000')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(17)
+        })
+      })
+
+      test( "200: returns empty array of articles when given a page number bigger than the maximum", () => {
+
+        return request(app)
+        .get('/api/articles?p=1000')
+        .expect(200)
+        .then(({body: {articles}}) => {
+          expect(articles).toHaveLength(0)
+        })
+      })
+
+      test("400: returns invalid query when given an invalid limit" , () => {
+        return request(app)
+        .get('/api/articles?limit=invalid')
+        .expect(400)
+        .then(({body:{message}}) => {
+          expect(message).toBe('invalid query')
+        })
+      })
+
+      test("400: returns invalid query when given an invalid page" , () => {
+        return request(app)
+        .get('/api/articles?p=invalid')
+        .expect(400)
+        .then(({body:{message}}) => {
+          expect(message).toBe('invalid query')
+        })
+      })
+
+      test("200: returns the total number of results ignoring the limit and page", () => {
+        return request(app)
+        .get('/api/articles?p=1&limit=5')
+        .expect(200)
+        .then(({body:{total}}) => {
+          expect(total).toBe(17)
+        })
+      })
+
+
+    } )
+
   });
 
   describe("/api/articles/:article_id/comments", () => {

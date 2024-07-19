@@ -18,7 +18,7 @@ exports.fetchArticleById = (article_id) => {
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
-    const isValidId = article_id.match(/^\d+$/)
+    const isValidId = /^\d+$/.test(article_id)
     
     if (!isValidId){
         return Promise.reject({status: 400, message: 'bad request'})
@@ -43,11 +43,26 @@ exports.fetchArticleById = (article_id) => {
 
 }
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) => {
-    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
+exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', limit=10, p=1, topic, author) => {
 
     const queryValues = []
+    const totalQueryValues = []
 
+    //Validate sort_by and order
+    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
+
+    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order) || !validSortBys.includes(sort_by)){
+        return Promise.reject({status: 400, message: 'invalid query'})
+    }
+
+    //validate limit and page
+    if(!/^\d+$/.test(p) || !/^\d+$/.test(limit)){
+        return Promise.reject({status: 400, message: 'invalid query'})
+    }
+    queryValues.push(limit)
+    queryValues.push(p)
+
+  
     let queryStr = `SELECT 
     articles.author, 
     articles.title, 
@@ -61,43 +76,47 @@ exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', topic, author) 
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id `
 
-    if (author){
-        queryStr += `WHERE articles.author=$1 `
-        queryValues.push(author)
+    let totalQueryStr = queryStr
+    
+
+    if (author || topic){
+        queryStr += `WHERE `
+        totalQueryStr += `WHERE `
+
+        if (author && topic){
+            queryStr += `articles.topic=$3 AND articles.author=$4 `
+            totalQueryStr += `articles.topic=$1 AND articles.author=$2 `
+            queryValues.push(topic, author)
+            totalQueryValues.push(topic, author)
+        } else if (author && !topic){
+            queryStr += `articles.author=$3 `
+            totalQueryStr += `articles.author=$1 `
+            queryValues.push(author)
+            totalQueryValues.push(author)
+        } else if (!author && topic){
+            queryStr += `articles.topic=$3 `
+            totalQueryStr += `articles.topic=$1 `
+            queryValues.push(topic)
+            totalQueryValues.push(topic)
+        }
     }
 
-    if (topic){
-        queryStr += `WHERE articles.topic=$1 `
-        queryValues.push(topic)
-    }
-
-
-    queryStr +=`GROUP BY 
+    queryStr += `GROUP BY 
     articles.article_id `
 
+    totalQueryStr += `GROUP BY 
+    articles.article_id `
 
-    if (!validSortBys.includes(sort_by)){
-        
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
+    queryStr += `ORDER BY ${sort_by} ${order} `
 
+    queryStr += `LIMIT $1 OFFSET $1*($2-1) `
 
-    queryStr += `ORDER BY ${sort_by} `
-
-
-
-    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order)){
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
-
-    queryStr += `${order}`
-
-
-    return db.query(queryStr, queryValues).then(( {rows} ) => {
-        return rows
-        
+    return Promise.all([db.query(queryStr, queryValues), db.query(totalQueryStr, totalQueryValues)])
+    .then(([result1, result2]) => {
+        const filteredArticles = result1.rows
+        const total_results = result2.rowCount
+        return [filteredArticles, total_results]
     })
-
 
 }
 
@@ -110,7 +129,7 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
     const {inc_votes} = patchBody
 
 
-    const isValidId = article_id.match(/^\d+$/)
+    const isValidId = /^\d+$/.test(article_id)
 
     const isValidIncVotes = (typeof inc_votes === 'number')
     
@@ -140,9 +159,6 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
 }
 
 exports.addArticle = (article) => {
-
-    
-
 
     let queryStr = `
     INSERT INTO articles (author, title, body, topic, article_img_url)
