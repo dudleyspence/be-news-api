@@ -3,41 +3,43 @@ const db = require('../db/connection')
 const {checkArticleIdExists, checkUsernameExists, checkCommentExists} = require('../db/utils/utils')
 
 
-exports.fetchComments = (sort_by = 'created_at', order = 'ASC', article_id) => {
+exports.fetchComments = (sort_by = 'created_at', order = 'ASC', limit=10, p=1, article_id) => {
     
     const validSortBys = ['created_at']
 
     const queryValues = []
     let queryStr = `SELECT * FROM comments `
 
+    //validate limit and page
+    if(!/^\d+$/.test(p) || !/^\d+$/.test(limit)){
+        return Promise.reject({status: 400, message: 'invalid query'})
+    }
+    queryValues.push(limit)
+    queryValues.push(p)
+
     
-    const isValidId = article_id.match(/^\d+$/)
-    
-    if (!isValidId){
+    if (!article_id.match(/^\d+$/)){
         return Promise.reject({status: 400, message: 'bad request'})
     }
 
     const promiseArray = []
 
     if(article_id){
-        queryStr += `WHERE article_id=$1 `
+        queryStr += `WHERE article_id=$3 `
         queryValues.push(article_id)
         promiseArray.push(checkArticleIdExists())
     }
     
-    
-     if (!validSortBys.includes(sort_by)){
-        
+    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order) || !validSortBys.includes(sort_by)){
         return Promise.reject({status: 400, message: 'invalid query'})
     }
 
-    queryStr += `ORDER BY ${sort_by} `
 
-    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order)){
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
 
-    queryStr += `${order}`
+    queryStr += `ORDER BY ${sort_by} ${order} `
+
+    queryStr += `LIMIT $1 OFFSET $1*($2-1) `
+
 
     promiseArray.push(db.query(queryStr, queryValues))
 
