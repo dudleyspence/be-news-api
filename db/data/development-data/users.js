@@ -1,38 +1,22 @@
-module.exports = [
+[
   {
-    username: 'tickle122',
-    name: 'Tom Tickle',
-    avatar_url:
-      'https://vignette.wikia.nocookie.net/mrmen/images/d/d6/Mr-Tickle-9a.png/revision/latest?cb=20180127221953'
+    "username": "naturelover23",
+    "name": "Alice Walker",
+    "avatar_url": "https://images.pexels.com/photos/1234567/pexels-photo-1234567.jpeg"
   },
   {
-    username: 'grumpy19',
-    name: 'Paul Grump',
-    avatar_url:
-      'https://vignette.wikia.nocookie.net/mrmen/images/7/78/Mr-Grumpy-3A.PNG/revision/latest?cb=20170707233013'
+    "username": "gearhead99",
+    "name": "Bob Smith",
+    "avatar_url": "https://images.pexels.com/photos/2345678/pexels-photo-2345678.jpeg"
   },
   {
-    username: 'happyamy2016',
-    name: 'Amy Happy',
-    avatar_url:
-      'https://vignette1.wikia.nocookie.net/mrmen/images/7/7f/Mr_Happy.jpg/revision/latest?cb=20140102171729'
+    "username": "hikefanatic",
+    "name": "Charlie Johnson",
+    "avatar_url": "https://images.pexels.com/photos/3456789/pexels-photo-3456789.jpeg"
   },
   {
-    username: 'cooljmessy',
-    name: 'Peter Messy',
-    avatar_url:
-      'https://vignette.wikia.nocookie.net/mrmen/images/1/1a/MR_MESSY_4A.jpg/revision/latest/scale-to-width-down/250?cb=20170730171002'
-  },
-  {
-    username: 'weegembump',
-    name: 'Gemma Bump',
-    avatar_url:
-      'https://vignette.wikia.nocookie.net/mrmen/images/7/7e/MrMen-Bump.png/revision/latest?cb=20180123225553'
-  },
-  {
-    username: 'jessjelly',
-    name: 'Jess Jelly',
-    avatar_url:
-      'https://vignette.wikia.nocookie.net/mrmen/images/4/4f/MR_JELLY_4A.jpg/revision/latest?cb=20180104121141'
+    "username": "outdoorenthusiast",
+    "name": "Dana Lee",
+    "avatar_url": "https://images.pexels.com/photos/4567890/pexels-photo-4567890.jpeg"
   }
-];
+]

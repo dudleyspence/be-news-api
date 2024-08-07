@@ -1,5 +1,14 @@
-module.exports = [
-  { description: 'Code is love, code is life', slug: 'coding' },
-  { description: 'FOOTIE!', slug: 'football' },
-  { description: 'Hey good looking, what you got cooking?', slug: 'cooking' }
-];
+[
+  {
+    "description": "Discuss the best hiking trails and share your experiences",
+    "slug": "trails"
+  },
+  {
+    "description": "Share tips and reviews on hiking gear",
+    "slug": "gear"
+  },
+  {
+    "description": "Everything about hiking, from tips to stories",
+    "slug": "general"
+  }
+]
