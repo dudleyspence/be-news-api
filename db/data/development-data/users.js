@@ -29,6 +29,7 @@ module.exports = [
     avatar_url:
       "https://img.freepik.com/free-photo/3d-icon-travel-with-woman_23-2151037416.jpg",
   },
+
   {
     username: "mountainlover",
     name: "Roy McKenzie",
