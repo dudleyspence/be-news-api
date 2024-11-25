@@ -19,7 +19,7 @@ Be News API is the backend service for a community-oriented application, designe
 ## **Hosted Version**
 
 Access the hosted version of the API:  
-**URL**: [https://be-news-api-2ebb.onrender.com](https://be-news-api-2ebb.onrender.com)
+**URL**: [https://be-news-api-production.up.railway.app/api](https://be-news-api-production.up.railway.app/api)
 
 ---
 
@@ -27,9 +27,8 @@ Access the hosted version of the API:
 
 - **Backend Framework**: Node.js with Express.js
 - **Database**: PostgreSQL
-- **ORM**: Knex.js for database queries
 - **Testing**: Jest and Supertest for unit and integration testing
-- **Hosting**: Render (https://render.com/)
+- **Hosting**: Railway (https://Railway.com/)
 
 ---
 
@@ -57,15 +56,15 @@ If you wish to contribute or run the project locally, follow these steps:
 ### **Installation**
 
 1. Clone the repository:
-   ```bash
+   ```
    git clone https://github.com/your_username/community-hub-api.git
    ```
 2. Navigate to the project directory:
-   ```bash
+   ```
    cd community-hub-api
    ```
 3. Install the dependencies:
-   ```bash
+   ```
    npm install
    ```
 
@@ -75,7 +74,7 @@ If you wish to contribute or run the project locally, follow these steps:
    - `.env.development` for development environment variables.
    - `.env.test` for test environment variables.
 2. Add the following configuration to each file:
-   ```plaintext
+   ```
    PGDATABASE=[database_name]
    ```
    Use one database for testing and another for development.
@@ -83,21 +82,21 @@ If you wish to contribute or run the project locally, follow these steps:
 ### **Seeding the Database**
 
 Seed the local database with initial data:
-```bash
+```
 npm run seed
 ```
 
 ### **Running Tests**
 
 Run the tests to ensure everything is set up correctly:
-```bash
+```
 npm test
 ```
 
 ### **Starting the Server**
 
 Start the development server:
-```bash
+```
 npm run dev
 ```
 
