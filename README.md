@@ -125,8 +125,6 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ---
 
-## **Related Projects**
-
 <section id="related-projects">
   <h2>Related Projects</h2>
   <p>
