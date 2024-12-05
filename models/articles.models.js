@@ -1,10 +1,12 @@
-const db = require('../db/connection')
-const { checkArticleIdExists, checkTopicExists, checkUsernameExists } = require('../db/utils/utils')
-
+const db = require("../db/connection");
+const {
+  checkArticleIdExists,
+  checkTopicExists,
+  checkUsernameExists,
+} = require("../db/utils/utils");
 
 exports.fetchArticleById = (article_id) => {
-
-    let queryStr = `SELECT 
+  let queryStr = `SELECT 
     articles.author, 
     articles.title, 
     articles.article_id, 
@@ -16,229 +18,258 @@ exports.fetchArticleById = (article_id) => {
     COUNT(comments.article_id)::INT AS comment_count
     FROM articles 
     LEFT JOIN comments 
-    ON articles.article_id = comments.article_id `
+    ON articles.article_id = comments.article_id `;
 
-    const isValidId = /^\d+$/.test(article_id)
-    
-    if (!isValidId){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
+  const isValidId = /^\d+$/.test(article_id);
 
-    
-    queryStr += `WHERE articles.article_id = $1 `
+  if (!isValidId) {
+    return Promise.reject({ status: 400, message: "bad request" });
+  }
 
+  queryStr += `WHERE articles.article_id = $1 `;
 
-    queryStr +=`GROUP BY 
-    articles.article_id `
+  queryStr += `GROUP BY 
+    articles.article_id `;
 
-    return checkArticleIdExists(article_id).then((articleExists) => {
-        if (!articleExists){
-            return Promise.reject({status: 404, message: "not found" })
-        } else {
-            return db.query(queryStr, [article_id])
-        }
-    }).then(({rows}) => {
-        return rows[0]
+  return checkArticleIdExists(article_id)
+    .then((articleExists) => {
+      if (!articleExists) {
+        return Promise.reject({ status: 404, message: "not found" });
+      } else {
+        return db.query(queryStr, [article_id]);
+      }
     })
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
 
-}
+exports.fetchArticles = (
+  sort_by = "created_at",
+  order = "DESC",
+  limit = 10,
+  p = 1,
+  topic,
+  author
+) => {
+  const queryValues = [];
+  const totalQueryValues = [];
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'DESC', limit=10, p=1, topic, author) => {
+  const validSortBys = [
+    "created_at",
+    "author",
+    "title",
+    "votes",
+    "comment_count",
+    "article_id",
+  ];
 
-    const queryValues = []
-    const totalQueryValues = []
+  if (
+    !["asc", "desc", "ASC", "DESC"].includes(order) ||
+    !validSortBys.includes(sort_by)
+  ) {
+    return Promise.reject({ status: 400, message: "invalid query" });
+  }
 
-    //Validate sort_by and order
-    const validSortBys = ['created_at', 'author', 'title', 'votes', 'comment_count', 'article_id']
+  if (!/^\d+$/.test(p) || !/^\d+$/.test(limit)) {
+    return Promise.reject({ status: 400, message: "invalid query" });
+  }
 
-    if (!['asc', 'desc', 'ASC', 'DESC'].includes(order) || !validSortBys.includes(sort_by)){
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
+  let queryStr = `
+      SELECT 
+        articles.author, 
+        users.avatar_url AS author_avatar_url,
+        articles.title, 
+        articles.article_id, 
+        articles.topic, 
+        articles.created_at, 
+        articles.votes, 
+        articles.article_img_url,
+        COUNT(comments.article_id)::INT AS comment_count
+      FROM articles 
+      LEFT JOIN comments ON articles.article_id = comments.article_id 
+      LEFT JOIN users ON articles.author = users.username
+    `;
 
-    //validate limit and page
-    if(!/^\d+$/.test(p) || !/^\d+$/.test(limit)){
-        return Promise.reject({status: 400, message: 'invalid query'})
-    }
-    queryValues.push(limit)
-    queryValues.push(p)
+  let totalQueryStr = `
+      SELECT COUNT(*)::INT AS total_results
+      FROM articles
+      LEFT JOIN users ON articles.author = users.username
+    `;
 
-  
-    let queryStr = `SELECT 
-    articles.author, 
-    articles.title, 
-    articles.article_id, 
-    articles.topic, 
-    articles.created_at, 
-    articles.votes, 
-    articles.article_img_url,
-    COUNT(comments.article_id)::INT AS comment_count
-    FROM articles 
-    LEFT JOIN comments 
-    ON articles.article_id = comments.article_id `
+  const whereConditions = [];
+  const totalWhereConditions = [];
 
-    let totalQueryStr = queryStr
-    
+  let index = 1;
 
-    if (author || topic){
-        queryStr += `WHERE `
-        totalQueryStr += `WHERE `
+  if (topic) {
+    whereConditions.push(`articles.topic = $${index}`);
+    totalWhereConditions.push(`articles.topic = $${index}`);
+    queryValues.push(topic);
+    totalQueryValues.push(topic);
+    index++;
+  }
 
-        if (author && topic){
-            queryStr += `articles.topic=$3 AND articles.author=$4 `
-            totalQueryStr += `articles.topic=$1 AND articles.author=$2 `
-            queryValues.push(topic, author)
-            totalQueryValues.push(topic, author)
-        } else if (author && !topic){
-            queryStr += `articles.author=$3 `
-            totalQueryStr += `articles.author=$1 `
-            queryValues.push(author)
-            totalQueryValues.push(author)
-        } else if (!author && topic){
-            queryStr += `articles.topic=$3 `
-            totalQueryStr += `articles.topic=$1 `
-            queryValues.push(topic)
-            totalQueryValues.push(topic)
-        }
-    }
+  if (author) {
+    whereConditions.push(`articles.author = $${index}`);
+    totalWhereConditions.push(`articles.author = $${index}`);
+    queryValues.push(author);
+    totalQueryValues.push(author);
+    index++;
+  }
 
-    queryStr += `GROUP BY 
-    articles.article_id `
+  if (whereConditions.length > 0) {
+    queryStr += ` WHERE ${whereConditions.join(" AND ")} `;
+    totalQueryStr += ` WHERE ${totalWhereConditions.join(" AND ")} `;
+  }
 
-    totalQueryStr += `GROUP BY 
-    articles.article_id `
+  queryStr += `
+      GROUP BY 
+        articles.article_id, 
+        users.avatar_url
+    `;
 
-    queryStr += `ORDER BY ${sort_by} ${order} `
+  if (sort_by === "comment_count") {
+    queryStr += ` ORDER BY "${sort_by}" ${order} `;
+  } else {
+    queryStr += ` ORDER BY ${sort_by} ${order} `;
+  }
 
-    queryStr += `LIMIT $1 OFFSET $1*($2-1) `
+  queryStr += ` LIMIT $${index} OFFSET $${index + 1} `;
 
-    return Promise.all([db.query(queryStr, queryValues), db.query(totalQueryStr, totalQueryValues)])
-    .then(([result1, result2]) => {
-        const filteredArticles = result1.rows
-        const total_results = result2.rowCount
-        return [filteredArticles, total_results]
-    })
+  queryValues.push(limit);
+  queryValues.push(limit * (p - 1));
 
-}
+  return Promise.all([
+    db.query(queryStr, queryValues),
+    db.query(totalQueryStr, totalQueryValues),
+  ]).then(([result1, result2]) => {
+    const filteredArticles = result1.rows;
+    const total_results = result2.rows[0].total_results;
+    return [filteredArticles, total_results];
+  });
+};
 
 exports.incVotesByArticleId = (article_id, patchBody) => {
+  if (
+    Object.keys(patchBody).length !== 1 ||
+    Object.keys(patchBody)[0] !== "inc_votes"
+  ) {
+    return Promise.reject({ status: 400, message: "bad request" });
+  }
 
-    if (Object.keys(patchBody).length !== 1 || Object.keys(patchBody)[0] !== "inc_votes"){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
-    
-    const {inc_votes} = patchBody
+  const { inc_votes } = patchBody;
 
+  const isValidId = /^\d+$/.test(article_id);
 
-    const isValidId = /^\d+$/.test(article_id)
+  const isValidIncVotes = typeof inc_votes === "number";
 
-    const isValidIncVotes = (typeof inc_votes === 'number')
-    
-    if (!isValidId || !isValidIncVotes){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
+  if (!isValidId || !isValidIncVotes) {
+    return Promise.reject({ status: 400, message: "bad request" });
+  }
 
-    let querySQL = `
+  let querySQL = `
         UPDATE articles
         SET votes = votes + $1
         WHERE article_id = $2
-        RETURNING votes `
+        RETURNING votes `;
 
-
-    return checkArticleIdExists(article_id).then((articleExists) => {
-        if (!articleExists){
-            return Promise.reject({status: 400, message: 'bad request'})
-        } else {
-            return db.query(querySQL, [inc_votes, article_id])
-        }
+  return checkArticleIdExists(article_id)
+    .then((articleExists) => {
+      if (!articleExists) {
+        return Promise.reject({ status: 400, message: "bad request" });
+      } else {
+        return db.query(querySQL, [inc_votes, article_id]);
+      }
     })
-    .then(({rows}) => {
-        return rows[0]
-    })
-    
-
-}
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
 
 exports.addArticle = (article) => {
-
-    let queryStr = `
+  let queryStr = `
     INSERT INTO articles (author, title, body, topic, article_img_url)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *, (
               SELECT COUNT(*)::INT 
               FROM comments 
               WHERE comments.article_id = articles.article_id
-          ) AS comment_count;`
+          ) AS comment_count;`;
 
-    let articleChecksArray = [checkUsernameExists(article.author), checkTopicExists(article.topic)]
+  let articleChecksArray = [
+    checkUsernameExists(article.author),
+    checkTopicExists(article.topic),
+  ];
 
-    const newArticleRequirements = ['author', 'title', 'body', 'topic']
+  const newArticleRequirements = ["author", "title", "body", "topic"];
 
-    const includesRequirements = newArticleRequirements.every((requiredKey) => Object.keys(article).includes(requiredKey))
+  const includesRequirements = newArticleRequirements.every((requiredKey) =>
+    Object.keys(article).includes(requiredKey)
+  );
 
-    if (!includesRequirements){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
+  if (!includesRequirements) {
+    return Promise.reject({ status: 400, message: "bad request" });
+  }
 
+  let queryValues = [
+    article.author,
+    article.title,
+    article.body,
+    article.topic,
+  ];
 
-    let queryValues = [article.author, article.title, article.body, article.topic]
-    
-    //a google suggested url regex
-    const urlRegex = /((http(s)?:\/\/)?(www\.)?[a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%._+~#?&//=]*))/ig;
+  //a google suggested url regex
+  const urlRegex =
+    /((http(s)?:\/\/)?(www\.)?[a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%._+~#?&//=]*))/gi;
 
-
-
-    if (article.article_img_url && urlRegex.test(article.article_img_url)){
-        queryValues.push(article.article_img_url)
-    } else {
-        queryStr = `
+  if (article.article_img_url && urlRegex.test(article.article_img_url)) {
+    queryValues.push(article.article_img_url);
+  } else {
+    queryStr = `
         INSERT INTO articles (author, title, body, topic)
         VALUES ($1, $2, $3, $4)
         RETURNING *, (
               SELECT COUNT(*)::INT 
               FROM comments 
               WHERE comments.article_id = articles.article_id
-          ) AS comment_count;`
-    }
+          ) AS comment_count;`;
+  }
 
-
-
-    return Promise.all(articleChecksArray).then(([authorExists, topicExists]) => {
-        if (!authorExists || !topicExists){
-
-            return Promise.reject({status: 400, message: 'bad request'})
-        } else {
-            return db.query(queryStr, queryValues)
-        }
-    }).then(({rows}) => {
-
-        return rows[0]
+  return Promise.all(articleChecksArray)
+    .then(([authorExists, topicExists]) => {
+      if (!authorExists || !topicExists) {
+        return Promise.reject({ status: 400, message: "bad request" });
+      } else {
+        return db.query(queryStr, queryValues);
+      }
     })
-
-
-
-    
-}
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
 
 exports.removeArticle = (article_id) => {
-    
-    if (!/^\d+$/.test(article_id)){
-        return Promise.reject({status: 400, message: 'bad request'})
-    }
+  if (!/^\d+$/.test(article_id)) {
+    return Promise.reject({ status: 400, message: "bad request" });
+  }
 
-    const sqlQuery = `
+  const sqlQuery = `
     DELETE FROM articles
     WHERE article_id=$1
-    RETURNING *`
+    RETURNING *`;
 
-    const queryValues = [article_id]
+  const queryValues = [article_id];
 
-    return checkArticleIdExists(article_id).then((articleExists) => {
-        if (!articleExists){
-            return Promise.reject({status: 404, message: "not found" })
-        } else {
-            return db.query(sqlQuery, queryValues)
-        }
-    }).then(({rows}) => {   
-        return rows
-    })   
-}
+  return checkArticleIdExists(article_id)
+    .then((articleExists) => {
+      if (!articleExists) {
+        return Promise.reject({ status: 404, message: "not found" });
+      } else {
+        return db.query(sqlQuery, queryValues);
+      }
+    })
+    .then(({ rows }) => {
+      return rows;
+    });
+};
