@@ -6,30 +6,37 @@ const {
 } = require("../db/utils/utils");
 
 exports.fetchArticleById = (article_id) => {
-  let queryStr = `SELECT 
-    articles.author, 
-    articles.title, 
-    articles.article_id, 
-    articles.topic, 
-    articles.created_at, 
-    articles.votes,
-    articles.body, 
-    articles.article_img_url,
-    COUNT(comments.article_id)::INT AS comment_count
+  let queryStr = `
+    SELECT 
+      articles.author, 
+      users.avatar_url AS author_avatar_url,
+      articles.title, 
+      articles.article_id, 
+      articles.topic, 
+      articles.created_at, 
+      articles.votes,
+      articles.body, 
+      articles.article_img_url,
+      COUNT(comments.article_id)::INT AS comment_count
     FROM articles 
     LEFT JOIN comments 
-    ON articles.article_id = comments.article_id `;
+      ON articles.article_id = comments.article_id
+    LEFT JOIN users
+      ON articles.author = users.username
+  `;
 
   const isValidId = /^\d+$/.test(article_id);
-
   if (!isValidId) {
     return Promise.reject({ status: 400, message: "bad request" });
   }
 
   queryStr += `WHERE articles.article_id = $1 `;
 
-  queryStr += `GROUP BY 
-    articles.article_id `;
+  queryStr += `
+    GROUP BY 
+      articles.article_id, 
+      users.avatar_url
+  `;
 
   return checkArticleIdExists(article_id)
     .then((articleExists) => {
