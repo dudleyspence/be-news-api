@@ -1,8 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getUsers, getUserByUsername } = require('../controllers/users.controllers');
+const {
+  getUsers,
+  getUserByFirebaseId,
+  createUser,
+} = require("../controllers/users.controllers");
 
-router.get('/users', getUsers);
-router.get('/users/:username', getUserByUsername)
+router.get("/users", getUsers);
+router.get("/users/:firebase_uid", getUserByFirebaseId);
+router.post("/users", createUser);
 
 module.exports = router;

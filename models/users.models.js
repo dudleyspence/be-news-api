@@ -1,26 +1,33 @@
-const db = require('../db/connection')
-const {checkUsernameExists} = require('../db/utils/utils')
+const db = require("../db/connection");
 
 exports.fetchUsers = () => {
-    const queryStr = `SELECT * FROM users `
+  const queryStr = `SELECT * FROM users `;
 
-    return db.query(queryStr).then(( {rows} ) => {
+  return db.query(queryStr).then(({ rows }) => {
+    return rows;
+  });
+};
 
-        return rows
-    })
-}
+exports.fetchUserByFirebaseId = (firebaseUid) => {
+  const queryStr = `SELECT * FROM users WHERE firebase_uid = $1`;
 
-exports.fetchUserByUsername = (username) => {
-    let queryStr = `SELECT * FROM users WHERE username=$1`
+  return db.query(queryStr, [firebaseUid]).then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, message: "User not found" });
+    }
+    return rows[0];
+  });
+};
 
+exports.insertUser = ({ firebase_uid, username, name, avatar_url }) => {
+  const queryStr = `
+      INSERT INTO users (firebase_uid, username, name, avatar_url)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+  const values = [firebase_uid, username, name, avatar_url];
 
-    return Promise.all([checkUsernameExists(username), db.query(queryStr, [username])])
-    .then(([usernameExists, {rows}]) => {
-        if (!usernameExists){
-            return Promise.reject({status: 404, message: 'not found'})
-        } else {
-            return rows[0]
-        }
-    })
-
-}
+  return db.query(queryStr, values).then(({ rows }) => {
+    return rows[0];
+  });
+};

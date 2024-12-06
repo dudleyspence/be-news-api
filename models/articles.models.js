@@ -2,13 +2,13 @@ const db = require("../db/connection");
 const {
   checkArticleIdExists,
   checkTopicExists,
-  checkUsernameExists,
+  checkFirebaseUidExists,
 } = require("../db/utils/utils");
 
 exports.fetchArticleById = (article_id) => {
   let queryStr = `
     SELECT 
-      articles.author, 
+      users.username AS author, 
       users.avatar_url AS author_avatar_url,
       articles.title, 
       articles.article_id, 
@@ -22,7 +22,7 @@ exports.fetchArticleById = (article_id) => {
     LEFT JOIN comments 
       ON articles.article_id = comments.article_id
     LEFT JOIN users
-      ON articles.author = users.username
+      ON articles.author = users.firebase_uid
   `;
 
   const isValidId = /^\d+$/.test(article_id);
@@ -35,6 +35,7 @@ exports.fetchArticleById = (article_id) => {
   queryStr += `
     GROUP BY 
       articles.article_id, 
+      users.username, 
       users.avatar_url
   `;
 
@@ -83,26 +84,26 @@ exports.fetchArticles = (
   }
 
   let queryStr = `
-      SELECT 
-        articles.author, 
-        users.avatar_url AS author_avatar_url,
-        articles.title, 
-        articles.article_id, 
-        articles.topic, 
-        articles.created_at, 
-        articles.votes, 
-        articles.article_img_url,
-        COUNT(comments.article_id)::INT AS comment_count
-      FROM articles 
-      LEFT JOIN comments ON articles.article_id = comments.article_id 
-      LEFT JOIN users ON articles.author = users.username
-    `;
+    SELECT 
+      users.username AS author, 
+      users.avatar_url AS author_avatar_url,
+      articles.title, 
+      articles.article_id, 
+      articles.topic, 
+      articles.created_at, 
+      articles.votes, 
+      articles.article_img_url,
+      COUNT(comments.article_id)::INT AS comment_count
+    FROM articles 
+    LEFT JOIN comments ON articles.article_id = comments.article_id 
+    LEFT JOIN users ON articles.author = users.firebase_uid
+  `;
 
   let totalQueryStr = `
-      SELECT COUNT(*)::INT AS total_results
-      FROM articles
-      LEFT JOIN users ON articles.author = users.username
-    `;
+    SELECT COUNT(*)::INT AS total_results
+    FROM articles
+    LEFT JOIN users ON articles.author = users.firebase_uid
+  `;
 
   const whereConditions = [];
   const totalWhereConditions = [];
@@ -131,13 +132,16 @@ exports.fetchArticles = (
   }
 
   queryStr += `
-      GROUP BY 
-        articles.article_id, 
-        users.avatar_url
-    `;
+    GROUP BY 
+      articles.article_id, 
+      users.username, 
+      users.avatar_url
+  `;
 
   if (sort_by === "comment_count") {
     queryStr += ` ORDER BY "${sort_by}" ${order} `;
+  } else if (sort_by === "author") {
+    queryStr += ` ORDER BY author ${order} `;
   } else {
     queryStr += ` ORDER BY ${sort_by} ${order} `;
   }
@@ -168,7 +172,6 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
   const { inc_votes } = patchBody;
 
   const isValidId = /^\d+$/.test(article_id);
-
   const isValidIncVotes = typeof inc_votes === "number";
 
   if (!isValidId || !isValidIncVotes) {
@@ -176,10 +179,11 @@ exports.incVotesByArticleId = (article_id, patchBody) => {
   }
 
   let querySQL = `
-        UPDATE articles
-        SET votes = votes + $1
-        WHERE article_id = $2
-        RETURNING votes `;
+    UPDATE articles
+    SET votes = votes + $1
+    WHERE article_id = $2
+    RETURNING votes 
+  `;
 
   return checkArticleIdExists(article_id)
     .then((articleExists) => {
@@ -199,13 +203,14 @@ exports.addArticle = (article) => {
     INSERT INTO articles (author, title, body, topic, article_img_url)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *, (
-              SELECT COUNT(*)::INT 
-              FROM comments 
-              WHERE comments.article_id = articles.article_id
-          ) AS comment_count;`;
+      SELECT COUNT(*)::INT 
+      FROM comments 
+      WHERE comments.article_id = articles.article_id
+    ) AS comment_count
+  `;
 
   let articleChecksArray = [
-    checkUsernameExists(article.author),
+    checkFirebaseUidExists(article.author),
     checkTopicExists(article.topic),
   ];
 
@@ -226,7 +231,6 @@ exports.addArticle = (article) => {
     article.topic,
   ];
 
-  //a google suggested url regex
   const urlRegex =
     /((http(s)?:\/\/)?(www\.)?[a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%._+~#?&//=]*))/gi;
 
@@ -234,13 +238,14 @@ exports.addArticle = (article) => {
     queryValues.push(article.article_img_url);
   } else {
     queryStr = `
-        INSERT INTO articles (author, title, body, topic)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *, (
-              SELECT COUNT(*)::INT 
-              FROM comments 
-              WHERE comments.article_id = articles.article_id
-          ) AS comment_count;`;
+      INSERT INTO articles (author, title, body, topic)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *, (
+        SELECT COUNT(*)::INT 
+        FROM comments 
+        WHERE comments.article_id = articles.article_id
+      ) AS comment_count
+    `;
   }
 
   return Promise.all(articleChecksArray)
@@ -264,7 +269,8 @@ exports.removeArticle = (article_id) => {
   const sqlQuery = `
     DELETE FROM articles
     WHERE article_id=$1
-    RETURNING *`;
+    RETURNING *
+  `;
 
   const queryValues = [article_id];
 

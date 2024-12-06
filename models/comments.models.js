@@ -1,7 +1,8 @@
+// comments.js
 const db = require("../db/connection");
 const {
   checkArticleIdExists,
-  checkUsernameExists,
+  checkFirebaseUidExists,
   checkCommentExists,
 } = require("../db/utils/utils");
 
@@ -15,25 +16,34 @@ exports.fetchComments = (
   const validSortBys = ["created_at", "votes"];
 
   const queryValues = [];
-  let queryStr = `SELECT * FROM comments `;
+  let queryStr = `
+    SELECT 
+      comments.comment_id,
+      comments.body,
+      comments.votes,
+      comments.created_at,
+      users.username AS author,
+      users.avatar_url AS author_avatar_url
+    FROM comments 
+    LEFT JOIN users ON comments.author = users.firebase_uid
+  `;
 
-  //validate limit and page
   if (!/^\d+$/.test(p) || !/^\d+$/.test(limit)) {
     return Promise.reject({ status: 400, message: "invalid query" });
   }
   queryValues.push(limit);
   queryValues.push(p);
 
-  if (!article_id.match(/^\d+$/)) {
+  if (!/^\d+$/.test(article_id)) {
     return Promise.reject({ status: 400, message: "bad request" });
   }
 
   const promiseArray = [];
 
   if (article_id) {
-    queryStr += `WHERE article_id=$3 `;
+    queryStr += `WHERE comments.article_id = $3 `;
     queryValues.push(article_id);
-    promiseArray.push(checkArticleIdExists());
+    promiseArray.push(checkArticleIdExists(article_id));
   }
 
   if (
@@ -60,37 +70,39 @@ exports.fetchComments = (
 
 exports.addComment = (comment, article_id) => {
   if (
-    !comment.username ||
+    !comment.author ||
     !comment.body ||
-    typeof comment.username !== "string" ||
+    typeof comment.author !== "string" ||
     typeof comment.body !== "string"
   ) {
     return Promise.reject({ status: 400, message: "bad request" });
   }
 
-  const isValidId = article_id.match(/^\d+$/);
+  const isValidId = /^\d+$/.test(article_id);
 
   if (!isValidId) {
     return Promise.reject({ status: 400, message: "bad request" });
   }
 
-  const postData = [comment.body, comment.username, Number(article_id)];
+  const postData = [comment.body, comment.author, Number(article_id)];
 
-  let queryStr = `INSERT INTO comments 
-    (body, author, article_id) 
+  const queryStr = `
+    INSERT INTO comments 
+      (body, author, article_id) 
     VALUES ($1, $2, $3) 
-    RETURNING *`;
+    RETURNING * 
+  `;
 
   const promiseArray = [
-    checkUsernameExists(comment.username),
+    checkFirebaseUidExists(comment.author),
     checkArticleIdExists(article_id),
   ];
 
   return Promise.all(promiseArray)
-    .then(([usernameExists, article_idExists]) => {
-      if (!usernameExists) {
+    .then(([authorExists, articleExists]) => {
+      if (!authorExists) {
         return Promise.reject({ status: 400, message: "bad request" });
-      } else if (!article_idExists) {
+      } else if (!articleExists) {
         return Promise.reject({ status: 404, message: "not found" });
       } else {
         return db.query(queryStr, postData);
@@ -102,7 +114,7 @@ exports.addComment = (comment, article_id) => {
 };
 
 exports.removeComment = (comment_id) => {
-  const isValidId = comment_id.match(/^\d+$/);
+  const isValidId = /^\d+$/.test(comment_id);
 
   if (!isValidId) {
     return Promise.reject({ status: 400, message: "bad request" });
@@ -110,8 +122,9 @@ exports.removeComment = (comment_id) => {
 
   const sqlQuery = `
     DELETE FROM comments
-    WHERE comment_id=$1
-    RETURNING *`;
+    WHERE comment_id = $1
+    RETURNING *
+  `;
 
   const queryValues = [comment_id];
 
@@ -139,19 +152,19 @@ exports.incVotesByCommentId = (comment_id, patchBody) => {
 
   const { inc_votes } = patchBody;
 
-  const isValidId = comment_id.match(/^\d+$/);
-
+  const isValidId = /^\d+$/.test(comment_id);
   const isValidIncVotes = typeof inc_votes === "number";
 
   if (!isValidId || !isValidIncVotes) {
     return Promise.reject({ status: 400, message: "bad request" });
   }
 
-  let querySQL = `
-        UPDATE comments
-        SET votes = votes + $1
-        WHERE comment_id = $2
-        RETURNING * `;
+  const querySQL = `
+    UPDATE comments
+    SET votes = votes + $1
+    WHERE comment_id = $2
+    RETURNING *
+  `;
 
   return checkCommentExists(comment_id)
     .then((commentExists) => {
