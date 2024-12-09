@@ -16,3 +16,11 @@ exports.checkFirebaseUidExists = (firebase_uid) => {
     .query(queryStr, [firebase_uid])
     .then((result) => result.rowCount > 0);
 };
+
+exports.checkCommentExists = (comment_id) => {
+  return db
+    .query(`SELECT * FROM comments WHERE comment_id=$1`, [comment_id])
+    .then(({ rows }) => {
+      return rows.length > 0;
+    });
+};
