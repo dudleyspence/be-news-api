@@ -1,4 +1,8 @@
-const { fetchUsers, fetchUserByFirebaseId } = require("../models/users.models");
+const {
+  fetchUsers,
+  fetchUserByFirebaseId,
+  insertUser,
+} = require("../models/users.models");
 
 exports.getUsers = (request, response, next) => {
   fetchUsers()
