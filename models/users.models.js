@@ -20,6 +20,9 @@ exports.fetchUserByFirebaseId = (firebaseUid) => {
 };
 
 exports.insertUser = ({ firebase_uid, username, name, avatar_url }) => {
+  if (!avatar_url){
+    avatar_url = 'https://static.vecteezy.com/system/resources/thumbnails/036/280/651/small/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg'; 
+  }
   const queryStr = `
       INSERT INTO users (firebase_uid, username, name, avatar_url)
       VALUES ($1, $2, $3, $4)

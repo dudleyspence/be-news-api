@@ -35,7 +35,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
           firebase_uid VARCHAR(255) PRIMARY KEY,
           username VARCHAR(50) UNIQUE NOT NULL,
           name VARCHAR(100) NOT NULL,
-          avatar_url TEXT DEFAULT 'https://static.vecteezy.com/system/resources/thumbnails/036/280/651/small/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg'
+          avatar_url TEXT 
         );`);
 
       return Promise.all([topicsTablePromise, usersTablePromise]);

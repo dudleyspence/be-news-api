@@ -61,36 +61,6 @@ module.exports = [
       "https://www.trekking-mont-blanc.com/wp-content/uploads/2020/06/Materiel-pour-une-randonnee-en-ete.jpg",
   },
   {
-    title: "Top 10 Hiking Trails in the USA",
-    topic: "trails",
-    author: "ChylbIMgo5gR5p2SSLYFqz0c7EG2",
-    body: `<p>Discover the top 10 hiking trails across the United States. From the rugged terrain of the Pacific Crest Trail to the scenic views of the Appalachian Trail, we cover the best paths for both novice and experienced hikers.</p>
-    <h2>Pacific Crest Trail</h2>
-    <p>Stretching over 2,650 miles from Mexico to Canada through California, Oregon, and Washington, the Pacific Crest Trail offers hikers an unparalleled experience of the diverse landscapes of the American West. With towering mountain ranges, deep forests, and arid deserts, this trail is a true test of endurance and a showcase of nature's beauty.</p>
-    <h2>Appalachian Trail</h2>
-    <p>The Appalachian Trail spans over 2,190 miles from Georgia to Maine, offering a variety of landscapes including dense forests, open meadows, and rugged mountains. Known for its well-maintained path and shelters, it's a favorite among long-distance hikers.</p>
-    <h2>John Muir Trail</h2>
-    <p>This 211-mile trail in California's Sierra Nevada mountains is renowned for its breathtaking scenery, including the iconic Yosemite Valley, Kings Canyon, and Sequoia National Park. The trail offers a challenging but rewarding experience for seasoned hikers.</p>
-    <h2>Continental Divide Trail</h2>
-    <p>Covering 3,100 miles from Mexico to Canada, the Continental Divide Trail traverses the Rocky Mountains and offers some of the most remote and challenging hiking in the U.S. With high altitudes and rugged terrain, it's a trail for the truly adventurous.</p>
-    <h2>Zion Narrows</h2>
-    <p>Located in Utah's Zion National Park, the Narrows offers a unique hiking experience through the Virgin River. Hikers wade through the river, surrounded by towering canyon walls, making it a refreshing and scenic adventure.</p>
-    <h2>Mount Whitney Trail</h2>
-    <p>This 22-mile round trip in California leads to the highest peak in the contiguous United States, standing at 14,505 feet. The trail offers stunning views and a challenging climb, making it a bucket-list hike for many.</p>
-    <h2>The Enchantments</h2>
-    <p>Situated in Washington State, the Enchantments is an 18-mile hike known for its alpine lakes, granite peaks, and pristine beauty. It's a strenuous hike that requires a permit, but the stunning scenery is worth the effort.</p>
-    <h2>Grand Canyon Rim-to-Rim</h2>
-    <p>This 24-mile hike takes you from the North Rim to the South Rim of the Grand Canyon, offering spectacular views of one of the world's natural wonders. It's a challenging hike that requires careful planning and preparation.</p>
-    <h2>Bryce Canyon's Fairyland Loop</h2>
-    <p>This 8-mile trail in Utah's Bryce Canyon National Park offers stunning views of the park's unique rock formations, known as hoodoos. It's a moderately difficult hike that showcases the park's otherworldly landscape.</p>
-    <h2>The Wave</h2>
-    <p>Located in Arizona's Coyote Buttes North, The Wave is a 6-mile round trip hike to a stunning sandstone rock formation. The hike requires a permit due to its popularity and fragile environment, but it's a must-see for any hiking enthusiast.</p>`,
-    created_at: 1604728980000,
-    votes: 15,
-    article_img_url:
-      "https://www.travelandleisure.com/thmb/rMsF0I7TzTibhKWprXEXPxGxFAg=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/7-glacier-national-park-montana-BESTHIKE0407-ec8a0153c18f4425a5fb48dead064b50.jpg",
-  },
-  {
     title: "Exploring the Wonders of Yellowstone",
     topic: "trails",
     author: "uid_5",
@@ -227,7 +197,7 @@ module.exports = [
     created_at: 1604728980000,
     votes: 9,
     article_img_url:
-      "https://fsguides.com/wp-content/uploads/2023/04/best-hikes-europe.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_CaiLbF-xyiFZ1PiWA17UyvEP5sex--b-fg&s",
   },
   {
     title: "Exploring the Trails of the Northeast",
