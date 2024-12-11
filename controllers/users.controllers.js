@@ -2,6 +2,7 @@ const {
   fetchUsers,
   fetchUserByFirebaseId,
   insertUser,
+  fetchUserStats,
 } = require("../models/users.models");
 
 exports.getUsers = (request, response, next) => {
@@ -32,6 +33,16 @@ exports.createUser = (request, response, next) => {
   insertUser({ firebase_uid, username, name, avatar_url })
     .then((user) => {
       response.status(201).send({ user });
+    })
+    .catch(next);
+};
+
+exports.getUserStats = (request, response, next) => {
+  const { firebase_uid } = request.params;
+
+  fetchUserStats(firebase_uid)
+    .then((stats) => {
+      response.status(200).send({ stats });
     })
     .catch(next);
 };
