@@ -10,7 +10,6 @@ const {
 router.get("/users", getUsers);
 router.get("/users/:firebase_uid", getUserByFirebaseId);
 router.post("/users", createUser);
-
-router.get("/users/:firebase_uid/stats", getUserStats);
+router.get("/users/stats/:firebase_uid", getUserStats);
 
 module.exports = router;
