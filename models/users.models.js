@@ -58,3 +58,38 @@ exports.fetchUserStats = (firebase_uid) => {
       return result.rows[0];
     });
 };
+
+exports.applyUserUpdate = (firebase_uid, userUpdate) => {
+  const { name, avatar_img_url } = userUpdate;
+
+  let query = "UPDATE users SET";
+  const queryValues = [];
+  const updates = [];
+
+  if (name) {
+    updates.push(`name = $${queryValues.length + 1}`);
+    queryValues.push(name);
+  }
+
+  if (avatar_img_url) {
+    updates.push(`avatar_img_url = $${queryValues.length + 1}`);
+    queryValues.push(avatar_img_url);
+  }
+
+  if (updates.length === 0) {
+    return Promise.reject(new Error("No valid fields to update"));
+  }
+
+  query +=
+    " " +
+    updates.join(", ") +
+    " WHERE firebase_uid = $" +
+    (queryValues.length + 1);
+  queryValues.push(firebase_uid);
+
+  return db.none(query, queryValues);
+};
+
+module.exports = {
+  updateUser,
+};

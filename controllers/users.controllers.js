@@ -3,6 +3,7 @@ const {
   fetchUserByFirebaseId,
   insertUser,
   fetchUserStats,
+  applyUserUpdate,
 } = require("../models/users.models");
 
 exports.getUsers = (request, response, next) => {
@@ -41,6 +42,17 @@ exports.getUserStats = (request, response, next) => {
   const { firebase_uid } = request.params;
 
   fetchUserStats(firebase_uid)
+    .then((stats) => {
+      response.status(200).send({ stats });
+    })
+    .catch(next);
+};
+
+exports.updateUser = (request, response, next) => {
+  const { firebase_uid } = request.params;
+  const userUpdate = request.body;
+
+  applyUserUpdate(firebase_uid, userUpdate)
     .then((stats) => {
       response.status(200).send({ stats });
     })
