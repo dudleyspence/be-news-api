@@ -87,6 +87,6 @@ exports.applyUserUpdate = (firebase_uid, userUpdate) => {
   queryValues.push(firebase_uid);
 
   return db.query(queryStr, queryValues).then(({ rows }) => {
-    return rows[0];
+    return userUpdate;
   });
 };
