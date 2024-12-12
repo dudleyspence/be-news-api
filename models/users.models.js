@@ -89,7 +89,3 @@ exports.applyUserUpdate = (firebase_uid, userUpdate) => {
 
   return db.none(query, queryValues);
 };
-
-module.exports = {
-  updateUser,
-};
