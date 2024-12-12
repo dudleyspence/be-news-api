@@ -72,7 +72,7 @@ exports.applyUserUpdate = (firebase_uid, userUpdate) => {
   }
 
   if (avatar_img_url) {
-    updates.push(`avatar_img_url = $${queryValues.length + 1}`);
+    updates.push(`avatar_url = $${queryValues.length + 1}`);
     queryValues.push(avatar_img_url);
   }
 
