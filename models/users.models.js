@@ -62,17 +62,17 @@ exports.fetchUserStats = (firebase_uid) => {
 exports.applyUserUpdate = (firebase_uid, userUpdate) => {
   const { name, avatar_img_url } = userUpdate;
 
-  let query = "UPDATE users SET";
+  let queryStr = "UPDATE users SET";
   const queryValues = [];
   const updates = [];
 
   if (name) {
-    updates.push(`name = $${queryValues.length + 1}`);
+    queryStr += `name = $${queryValues.length + 1}`;
     queryValues.push(name);
   }
 
   if (avatar_img_url) {
-    updates.push(`avatar_img_url = $${queryValues.length + 1}`);
+    queryStr += `avatar_img_url = $${queryValues.length + 1}`;
     queryValues.push(avatar_img_url);
   }
 
@@ -80,12 +80,10 @@ exports.applyUserUpdate = (firebase_uid, userUpdate) => {
     return Promise.reject(new Error("No valid fields to update"));
   }
 
-  query +=
-    " " +
-    updates.join(", ") +
-    " WHERE firebase_uid = $" +
-    (queryValues.length + 1);
+  queryStr += ` WHERE firebase_uid = $${queryValues.length + 1}`;
   queryValues.push(firebase_uid);
 
-  return db.none(query, queryValues);
+  return db.query(queryStr, queryValues).then(({ rows }) => {
+    return rows[0];
+  });
 };
